@@ -15,7 +15,6 @@ import { isSidebarOpenAtom, zoomLevelAtom } from '../store/atoms/uiState';
 
 export const Header: React.FC = () => {
   const [zoom, setZoom] = useAtom(zoomLevelAtom);
-  const isSidebarOpen = useAtomValue(isSidebarOpenAtom);
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.5));
