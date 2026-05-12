@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { boardDataAtom, hiddenColumnsAtom, carouselStartIndexAtom, activeProfileAtom, columnIndicesAtom } from '../atoms/boardState';
+import { boardDataAtom, hiddenColumnsAtom, activeProfileAtom, columnIndicesAtom } from '../atoms/boardState';
 import type { ColumnData } from '../../core/types';
 
 export const visibleColumnsAtom = atom<ColumnData[]>((get) => {
