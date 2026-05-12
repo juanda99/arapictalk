@@ -4,7 +4,6 @@ import { useAtomValue, useAtom } from 'jotai';
 import { Cell } from './Cell';
 import type { ColumnData } from '../core/types';
 import { activeProfileAtom, boardDataAtom, columnIndicesAtom } from '../store/atoms/boardState';
-import { isSidebarOpenAtom, zoomLevelAtom } from '../store/atoms/uiState';
 import IconButton from '@mui/material/IconButton';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import Tooltip from '@mui/material/Tooltip';
@@ -18,8 +17,6 @@ interface Props {
 export const Column: React.FC<Props> = ({ data, slotIndex, colWidth }) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const profile = useAtomValue(activeProfileAtom);
-  const isSidebarOpen = useAtomValue(isSidebarOpenAtom);
-  const zoom = useAtomValue(zoomLevelAtom);
   const boardData = useAtomValue(boardDataAtom);
   const [indices, setIndices] = useAtom(columnIndicesAtom);
 

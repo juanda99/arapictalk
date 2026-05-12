@@ -3,7 +3,6 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -11,14 +10,12 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import AspectRatioIcon from '@mui/icons-material/AspectRatio';
-import { useSetAtom, useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { isSidebarOpenAtom, zoomLevelAtom } from '../store/atoms/uiState';
-import { useTranslation } from 'react-i18next';
 
 export const Header: React.FC = () => {
-  const { t } = useTranslation();
-  const setSidebarOpen = useSetAtom(isSidebarOpenAtom);
   const [zoom, setZoom] = useAtom(zoomLevelAtom);
+  const isSidebarOpen = useAtomValue(isSidebarOpenAtom);
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.5));
