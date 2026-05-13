@@ -1,56 +1,53 @@
-import axios from 'axios';
+import { atom } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
-const API_BASE_URL = 'https://api.arasaac.org/api/pictograms';
-
-export interface Pictogram {
+interface ArasaacPictogram {
   _id: number;
-  keywords: { keyword: string; meaning: string }[];
-  schematic: boolean;
-  sex: boolean;
-  violence: boolean;
-  hair: boolean;
-  skin: boolean;
-  aac: boolean;
-  aacColor: boolean;
-  active: boolean;
-  downloads: number;
-  categories: string[];
-  synsets: string[];
-  tags: string[];
-  lastUpdated: string;
+  keywords: Array<{ keyword: string }>;
 }
 
-export const getPictoById = async (id: number, locale = 'es'): Promise<Pictogram> => {
-  const { data } = await axios.get(`${API_BASE_URL}/${locale}/${id}`);
-  return data;
+export const getPictogramImageUrl = (id: number | string, resolution = 300) => {
+  return `https://static.arasaac.org/pictograms/${id}/${id}_${resolution}.png`;
 };
 
-export const searchPictos = async (query: string, locale = 'es'): Promise<Pictogram[]> => {
-  const { data } = await axios.get(`${API_BASE_URL}/${locale}/search/${query}`);
-  return data;
+export const fetchPictogramData = async (keyword: string, language: string): Promise<ArasaacPictogram[] | null> => {
+  if (!keyword) return null;
+  
+  try {
+    const res = await fetch(`https://api.arasaac.org/api/pictograms/${language}/search/${encodeURIComponent(keyword)}`);
+    if (!res.ok) {
+      if (res.status === 404) return [];
+      throw new Error('Error al conectar con la API de Arasaac');
+    }
+    const data: ArasaacPictogram[] = await res.json();
+    return data;
+  } catch (error) {
+    console.error(`Error buscando pictograma para "${keyword}":`, error);
+    return null;
+  }
 };
 
-export const getPictoUrl = (id: number): string => {
-  return `https://static.arasaac.org/pictograms/${id}/${id}_300.png`;
-};
-
-export const getPictogramImageUrl = (id: number | string, size = 300) => {
-  return `https://static.arasaac.org/pictograms/${id}/${id}_${size}.png`;
-};
-
-export const usePictogram = (keyword: string, locale = 'es') => {
-  return useQuery({
-    queryKey: ['pictograms', keyword, locale],
-    queryFn: () => searchPictos(keyword, locale),
-    enabled: !!keyword,
-    staleTime: 1000 * 60 * 60, // 1 hour
-  });
+export const getPictoById = async (id: number, language: string) => {
+  const res = await fetch(`https://api.arasaac.org/api/pictograms/${language}/${id}`);
+  if (!res.ok) return null;
+  return res.json();
 };
 
 export const arasaacApi = {
+  getPictoUrl: getPictogramImageUrl,
+  searchPictos: fetchPictogramData,
   getPictoById,
-  searchPictos,
-  getPictoUrl,
-  getPictogramImageUrl
+};
+
+export const usePictogram = (keyword: string) => {
+  const { i18n } = useTranslation();
+  const language = i18n.language || 'es';
+
+  return useQuery({
+    queryKey: ['pictogram', language, keyword],
+    queryFn: () => fetchPictogramData(keyword, language),
+    staleTime: 1000 * 60 * 60 * 24,
+    retry: 1,
+  });
 };
