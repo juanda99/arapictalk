@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAtom } from 'jotai';
 import { isSidebarOpenAtom, themeModeAtom } from '../store/atoms/uiState';
 import { activeProfileAtom } from '../store/atoms/boardState';
-import { UserProfile } from '../core/types';
+import type { UserProfile } from '../core/types';
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
