@@ -1,89 +1,114 @@
-import React, { useCallback } from 'react';
-import { useSetAtom, useAtomValue } from 'jotai';
-import { sentenceElementsAtom, activeProfileAtom } from '../store/atoms/boardState';
-import { usePictogram, getPictogramImageUrl } from '../services/arasaacApi';
+import React from 'react';
+import { useAtomValue } from 'jotai';
+import { activeProfileAtom } from '../store/atoms/boardState';
+import { useQuery } from '@tanstack/react-query';
+import { arasaacApi } from '../services/arasaacApi';
 
 interface CellProps {
-  keyword: string;
+  text: string;
+  pictoId?: number;
+  columnType?: string;
 }
 
-export const Cell: React.FC<CellProps> = React.memo(({ keyword }) => {
+const FITZGERALD_COLORS: Record<string, string> = {
+  'Personas': '#FFF59D',
+  'Lugares': '#C8E6C9',
+  'Acciones': '#BBDEFB',
+  'Objetos': '#FFE0B2',
+  'Descriptores': '#E1BEE7',
+  'Social': '#F8BBD0',
+  'Tiempo': '#D7CCC8',
+};
+
+export const Cell: React.FC<CellProps> = ({ text, pictoId, columnType }) => {
   const profile = useAtomValue(activeProfileAtom);
-  const { data: pictograms, isLoading } = usePictogram(keyword);
-  const setSentenceElements = useSetAtom(sentenceElementsAtom);
 
-  const handleClick = useCallback(() => {
-    setSentenceElements((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(), 
-        text: keyword,
-        pictoIds: pictograms && pictograms.length > 0 ? pictograms.map(p => p._id) : undefined,
-        currentPictoIndex: pictograms && pictograms.length > 0 ? 0 : undefined,
-      }
-    ]);
-  }, [keyword, pictograms, setSentenceElements]);
+  // Query para obtener traducciones si el texto secundario está activo
+  const { data: translation } = useQuery({
+    queryKey: ['picto-translation', pictoId, profile.secondaryLanguage],
+    queryFn: () => arasaacApi.getPictoById(pictoId!, profile.secondaryLanguage),
+    enabled: !!(profile.secondaryTextEnabled && pictoId && profile.secondaryLanguage),
+    staleTime: Infinity,
+  });
 
-  const primaryPictogramId = pictograms && pictograms.length > 0 ? pictograms[0]._id : null;
+  // Fitzgerald coloring logic
+  const getBackgroundColor = () => {
+    if (profile.fitzgeraldEnabled && columnType && FITZGERALD_COLORS[columnType]) {
+      return FITZGERALD_COLORS[columnType];
+    }
+    return profile.backgroundColor;
+  };
+
+  const getBorderColor = () => {
+    if (profile.borderColor === 'fitzgerald' && columnType && FITZGERALD_COLORS[columnType]) {
+      return FITZGERALD_COLORS[columnType];
+    }
+    return profile.borderColor;
+  };
 
   const cellStyle: React.CSSProperties = {
-    backgroundColor: profile.backgroundColor,
-    border: profile.cellBorders ? `${profile.borderWidth}px solid ${profile.borderColor}` : 'none',
+    backgroundColor: getBackgroundColor(),
+    border: profile.cellBorders ? `${profile.borderWidth}px solid ${getBorderColor()}` : 'none',
     borderRadius: `${profile.borderRadius}px`,
     display: 'flex',
     flexDirection: profile.textPosition === 'top' ? 'column-reverse' : (profile.textPosition === 'bottom' ? 'column' : 'column'),
     justifyContent: profile.textPosition === 'center' ? 'center' : 'space-between',
+    alignItems: 'center',
     padding: '4px',
     height: '100%',
     width: '100%',
-    position: 'relative'
+    boxSizing: 'border-box',
+    gap: '2px',
+    position: 'relative',
+    overflow: 'hidden'
   };
 
   const textStyle: React.CSSProperties = {
-    fontSize: `${profile.fontSize}px`,
-    color: profile.fontColor,
     fontFamily: profile.fontFamily,
-    textTransform: profile.capitalLetters ? 'uppercase' : 'none',
-    fontWeight: 'bold',
+    fontSize: `${profile.fontSize}px`,
+    fontWeight: profile.fontWeight as any || 'normal',
+    fontStyle: profile.fontStyle || 'normal',
+    textDecoration: profile.textDecoration || 'none',
+    color: profile.fontColor,
     textAlign: 'center',
     width: '100%',
-    display: profile.showText ? 'block' : 'none',
-    padding: '2px'
+    wordBreak: 'break-word',
+    textTransform: profile.capitalLetters ? 'uppercase' : 'none',
+    lineHeight: 1.1,
+    zIndex: 2
   };
 
-  if (profile.textPosition === 'center') {
-    textStyle.position = 'absolute';
-    textStyle.top = '50%';
-    textStyle.left = '50%';
-    textStyle.transform = 'translate(-50%, -50%)';
-    textStyle.backgroundColor = 'rgba(255,255,255,0.7)';
-    textStyle.borderRadius = '4px';
-    textStyle.width = 'auto';
-    textStyle.maxWidth = '90%';
-  }
+  const secondaryTextStyle: React.CSSProperties = {
+    ...textStyle,
+    fontSize: `${Math.max(profile.fontSize * 0.7, 8)}px`,
+    opacity: 0.7,
+    marginTop: profile.textPosition === 'bottom' ? '0' : '2px',
+    marginBottom: profile.textPosition === 'top' ? '0' : '2px',
+  };
 
   return (
-    <button className="cell" onClick={handleClick} style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer', width: '100%', height: '100%' }}>
-      <div style={cellStyle}>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
-          {isLoading ? (
-            <div className="skeleton-image" style={{ width: '100%', height: '100%', backgroundColor: '#eee' }} />
-          ) : primaryPictogramId ? (
-            <img 
-              src={getPictogramImageUrl(primaryPictogramId, 300)} 
-              alt={keyword} 
-              loading="lazy"
-              crossOrigin="anonymous"
-              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-            />
-          ) : (
-            <div className="no-image-placeholder" style={{ width: '100%', height: '100%', backgroundColor: '#f9f9f9' }} />
+    <div className="cell" style={cellStyle}>
+      {profile.showText && (
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
+          <div style={textStyle}>{text}</div>
+          {profile.secondaryTextEnabled && translation && (
+            <div style={secondaryTextStyle}>{translation.name}</div>
           )}
         </div>
-        <span style={textStyle}>{keyword}</span>
-      </div>
-    </button>
+      )}
+      
+      {pictoId && (
+        <img 
+          src={arasaacApi.getPictoUrl(pictoId)} 
+          alt={text}
+          style={{ 
+            maxWidth: '100%', 
+            maxHeight: profile.showText ? '70%' : '90%', 
+            objectFit: 'contain',
+            flex: 1
+          }} 
+        />
+      )}
+    </div>
   );
-});
-
-Cell.displayName = 'Cell';
+};

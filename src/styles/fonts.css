@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap');
+
+/* Custom AraWrite fonts */
+@font-face {
+    font-family: 'Escolar';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/Escolar_G.TTF') format('truetype');
+}
+
+@font-face {
+    font-family: 'Escolar';
+    font-style: normal;
+    font-weight: 700;
+    src: url('/fonts/Escolar_N.TTF') format('truetype');
+}
+
+@font-face {
+    font-family: 'Massallera';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/massallera.TTF') format('truetype');
+}
+
+@font-face {
+    font-family: 'Memima';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/Memima.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'OpenDyslexic';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/OpenDyslexic-Regular.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'OpenDyslexic';
+    font-style: normal;
+    font-weight: 700;
+    src: url('/fonts/OpenDyslexic-Bold.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Pipomayu';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/pipomayu.TTF') format('truetype');
+}
