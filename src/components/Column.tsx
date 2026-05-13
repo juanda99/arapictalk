@@ -148,7 +148,7 @@ export const Column: React.FC<Props> = ({ data, slotIndex, colWidth }) => {
               }}
               className="cell-wrapper"
             >
-              <Cell keyword={data.contenido[virtualRow.index]} />
+              <Cell keyword={data.contenido[virtualRow.index]} columnType={data.tipo} />
             </div>
           ))}
         </div>

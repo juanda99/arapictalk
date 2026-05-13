@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAtom } from 'jotai';
 import { isSidebarOpenAtom } from '../store/atoms/uiState';
 import { activeProfileAtom } from '../store/atoms/boardState';
+import type { UserProfile } from '../core/types';
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -10,10 +11,8 @@ import Divider from '@mui/material/Divider';
 import Switch from '@mui/material/Switch';
 import Slider from '@mui/material/Slider';
 import TuneIcon from '@mui/icons-material/Tune';
-import SearchIcon from '@mui/icons-material/Search';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -27,16 +26,29 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import FormatAlignTopIcon from '@mui/icons-material/VerticalAlignTop';
 import FormatAlignCenterIcon from '@mui/icons-material/VerticalAlignCenter';
 import FormatAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
+import FormatBoldIcon from '@mui/icons-material/FormatBold';
+import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ImageIcon from '@mui/icons-material/Image';
 import ShareIcon from '@mui/icons-material/Share';
+import BugReportIcon from '@mui/icons-material/BugReport';
+import LanguageIcon from '@mui/icons-material/Language';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import { themeModeAtom } from '../store/atoms/uiState';
+import { FONT_LIST } from '../constants/fonts';
+import { FontOption } from './FontOption';
+import languages from '../constants/languages';
 
 const FITZGERALD_COLORS = [
   { name: 'Personas', color: '#FFF59D' },
@@ -48,11 +60,12 @@ const FITZGERALD_COLORS = [
   { name: 'Tiempo', color: '#D7CCC8' },
 ];
 
-const FONT_LIST = ['OpenSans', 'Roboto', 'Arial', 'Verdana', 'Comic Sans MS'];
+
 
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useAtom(isSidebarOpenAtom);
   const [profile, setProfile] = useAtom(activeProfileAtom);
+  const [themeMode, setThemeMode] = useAtom(themeModeAtom);
   const [sidebarMode, setSidebarMode] = useState<'settings' | 'library' | 'local' | 'templates'>('settings');
   const [tabIndex, setTabIndex] = useState(0);
   const [expandedSection, setExpandedSection] = useState<string | null>('text');
@@ -61,7 +74,7 @@ export const Sidebar: React.FC = () => {
   const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(null);
   const openExportMenu = Boolean(exportAnchorEl);
 
-  const updateProfile = (key: string, value: any) => {
+  const updateProfile = (key: keyof UserProfile, value: unknown) => {
     setProfile((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -74,7 +87,7 @@ export const Sidebar: React.FC = () => {
     }
   };
 
-  const handleAccordionChange = (section: string) => (_: any, isExpanded: boolean) => {
+  const handleAccordionChange = (section: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
     setExpandedSection(isExpanded ? section : null);
   };
 
@@ -127,25 +140,6 @@ export const Sidebar: React.FC = () => {
             <span style={{ fontSize: '10px', fontWeight: 600 }}>Ajustes</span>
           </Box>
 
-          {/* Pictogramas */}
-          <Box
-            onClick={() => handleNavClick('library')}
-            sx={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%',
-              cursor: 'pointer', color: 'text.secondary', p: '0.5rem',
-              bgcolor: (isOpen && sidebarMode === 'library') ? 'background.default' : 'transparent',
-              borderTop: 1, borderBottom: 1,
-              borderColor: (isOpen && sidebarMode === 'library') ? 'divider' : 'transparent',
-              borderLeft: (isOpen && sidebarMode === 'library') ? '3px solid #8bc34a' : '3px solid transparent',
-              boxShadow: (theme) => (isOpen && sidebarMode === 'library') ? `1px 0 0 ${theme.palette.background.default}` : 'none',
-              transition: 'all 0.2s',
-              position: 'relative', zIndex: (isOpen && sidebarMode === 'library') ? 2 : 1,
-            }}
-            title="Pictogramas"
-          >
-            <SearchIcon style={{ fontSize: '2rem', marginBottom: '4px', color: '#8bc34a' }} />
-            <span style={{ fontSize: '10px', fontWeight: 600 }}>Pictogramas</span>
-          </Box>
 
           {/* Mis Imágenes */}
           <Box
@@ -238,33 +232,34 @@ export const Sidebar: React.FC = () => {
             </span>
           </Tooltip>
           <Divider sx={{ width: '40px', my: 1 }} />
-          <Tooltip title="Reiniciar" placement="right">
-            <span>
-              <IconButton size="medium" color="error" sx={{ bgcolor: 'rgba(211, 47, 47, 0.04)' }}>
-                <RestartAltIcon fontSize="medium" />
-              </IconButton>
-            </span>
-          </Tooltip>
 
-          {/* Actividades */}
-          <Box
-            onClick={() => handleNavClick('templates')}
-            sx={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%',
-              cursor: 'pointer', color: 'text.secondary', p: '0.5rem',
-              bgcolor: (isOpen && sidebarMode === 'templates') ? 'background.default' : 'transparent',
-              borderTop: 1, borderBottom: 1,
-              borderColor: (isOpen && sidebarMode === 'templates') ? 'divider' : 'transparent',
-              borderLeft: (isOpen && sidebarMode === 'templates') ? '3px solid #673ab7' : '3px solid transparent',
-              boxShadow: (theme) => (isOpen && sidebarMode === 'templates') ? `1px 0 0 ${theme.palette.background.default}` : 'none',
-              transition: 'all 0.2s',
-              position: 'relative', zIndex: (isOpen && sidebarMode === 'templates') ? 2 : 1,
-            }}
-            title="Actividades"
-          >
-            <DashboardIcon style={{ fontSize: '2rem', marginBottom: '4px', color: '#673ab7' }} />
-            <span style={{ fontSize: '10px', fontWeight: 600, textAlign: 'center' }}>Actividades</span>
-          </Box>
+
+          {/* Utility Icons */}
+          <Tooltip title="Reiniciar" placement="right">
+            <IconButton size="small" color="error">
+              <RestartAltIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={themeMode === 'light' ? "Modo oscuro" : "Modo claro"} placement="right">
+            <IconButton onClick={() => setThemeMode((prev: 'light' | 'dark') => prev === 'light' ? 'dark' : 'light')} size="small" color="inherit">
+              {themeMode === 'light' ? <DarkModeIcon fontSize="small" /> : <LightModeIcon fontSize="small" />}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Informar de un error" placement="right">
+            <IconButton size="small" color="inherit">
+              <BugReportIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Idioma" placement="right">
+            <IconButton size="small" color="inherit">
+              <LanguageIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Perfil" placement="right">
+            <IconButton size="small" color="inherit">
+              <AccountCircleIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </div>
       </Box>
 
@@ -436,7 +431,10 @@ export const Sidebar: React.FC = () => {
                           size="small"
                           options={FONT_LIST}
                           value={profile.fontFamily}
-                          onChange={(_, val) => updateProfile('fontFamily', val || 'OpenSans')}
+                          onChange={(_, val) => updateProfile('fontFamily', val || 'Open Sans')}
+                          renderOption={(props, option) => (
+                            <FontOption key={option} props={props} option={option} />
+                          )}
                           renderInput={(params) => <TextField {...params} size="small" />}
                         />
                       </Box>
@@ -452,6 +450,42 @@ export const Sidebar: React.FC = () => {
                           max={50}
                           onChange={(_, val) => updateProfile('fontSize', val)}
                         />
+                      </Box>
+
+                      <Box>
+                        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 1 }}>Estilo de fuente</Typography>
+                        <Box sx={{ display: 'flex', border: '1px solid', borderColor: 'divider', borderRadius: '6px', overflow: 'hidden', width: 'fit-content' }}>
+                          <IconButton 
+                            onClick={() => updateProfile('fontWeight', profile.fontWeight === 'bold' ? 'normal' : 'bold')}
+                            sx={{ 
+                              borderRadius: 0, p: 1, 
+                              bgcolor: profile.fontWeight === 'bold' ? 'action.selected' : 'transparent',
+                              color: profile.fontWeight === 'bold' ? 'primary.main' : 'text.secondary'
+                            }}
+                          >
+                            <FormatBoldIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton 
+                            onClick={() => updateProfile('fontStyle', profile.fontStyle === 'italic' ? 'normal' : 'italic')}
+                            sx={{ 
+                              borderRadius: 0, p: 1, borderLeft: '1px solid', borderRight: '1px solid', borderColor: 'divider',
+                              bgcolor: profile.fontStyle === 'italic' ? 'action.selected' : 'transparent',
+                              color: profile.fontStyle === 'italic' ? 'primary.main' : 'text.secondary'
+                            }}
+                          >
+                            <FormatItalicIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton 
+                            onClick={() => updateProfile('textDecoration', profile.textDecoration === 'underline' ? 'none' : 'underline')}
+                            sx={{ 
+                              borderRadius: 0, p: 1,
+                              bgcolor: profile.textDecoration === 'underline' ? 'action.selected' : 'transparent',
+                              color: profile.textDecoration === 'underline' ? 'primary.main' : 'text.secondary'
+                            }}
+                          >
+                            <FormatUnderlinedIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Box>
 
                       <Box>
@@ -494,6 +528,38 @@ export const Sidebar: React.FC = () => {
                             </IconButton>
                           </Tooltip>
                         </Box>
+                      </Box>
+
+                      <Divider sx={{ my: 1 }} />
+
+                      <Box>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={!!profile.secondaryTextEnabled}
+                              onChange={(e) => updateProfile('secondaryTextEnabled', e.target.checked)}
+                              color="primary"
+                              size="small"
+                            />
+                          }
+                          label={<Typography sx={{ fontSize: '0.9rem', fontWeight: 'bold' }}>Texto adicional</Typography>}
+                        />
+
+                        {profile.secondaryTextEnabled && (
+                          <Box sx={{ pl: 2, mt: 1, display: 'flex', flexDirection: 'column', gap: 1, borderLeft: '2px solid', borderColor: 'primary.light' }}>
+                            <Box>
+                              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Idioma:</Typography>
+                              <Autocomplete
+                                size="small"
+                                options={languages}
+                                getOptionLabel={(option) => option.label}
+                                value={languages.find(l => l.code === (profile.secondaryLanguage || 'en')) || languages[1]}
+                                onChange={(_, val) => updateProfile('secondaryLanguage', val?.code || 'en')}
+                                renderInput={(params) => <TextField {...params} size="small" />}
+                              />
+                            </Box>
+                          </Box>
+                        )}
                       </Box>
 
                       <Box>
@@ -549,77 +615,173 @@ export const Sidebar: React.FC = () => {
                     Estilo
                   </Typography>
                 </AccordionSummary>
-                <AccordionDetails sx={{ pt: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Box>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={profile.cellBorders}
-                          onChange={(e) => updateProfile('cellBorders', e.target.checked)}
-                          color="primary"
-                        />
-                      }
-                      label={<Typography sx={{ fontSize: '0.9rem', fontWeight: 500 }}>Activar bordes</Typography>}
-                    />
-                    {profile.cellBorders && (
-                      <Box sx={{ pl: 3, mt: 1, borderLeft: '2px solid #e3f2fd', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <Box>
-                          <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 1 }}>Color de borde</Typography>
-                          <Box sx={{ display: 'flex', gap: '4px', flexWrap: 'wrap', mb: 1 }}>
-                            {FITZGERALD_COLORS.map((c) => (
-                              <Box
-                                key={c.name}
-                                onClick={() => updateProfile('borderColor', c.color)}
-                                sx={{ width: '22px', height: '22px', backgroundColor: c.color, border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' }}
+                <AccordionDetails sx={{ pt: 0 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', mt: 1 }}>
+                    
+                    {/* Borders */}
+                    <Box>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={profile.cellBorders}
+                            onChange={(e) => updateProfile('cellBorders', e.target.checked)}
+                            color="primary"
+                            size="small"
+                          />
+                        }
+                        label={<Typography sx={{ fontSize: '0.9rem', fontWeight: 500 }}>Habilitar bordes</Typography>}
+                      />
+
+                      {profile.cellBorders && (
+                        <Box sx={{ pl: 3, mt: 1, borderLeft: '2px solid', borderColor: 'primary.light', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                size="small"
+                                checked={profile.borderColor === 'fitzgerald'}
+                                onChange={(e) => updateProfile('borderColor', e.target.checked ? 'fitzgerald' : '#CCCCCC')}
                               />
-                            ))}
+                            }
+                            label={<Typography sx={{ fontSize: '0.8rem' }}>Usar <Link href="#" onClick={(e) => e.preventDefault()} sx={{ fontWeight: 'bold' }}>clave Fitzgerald</Link></Typography>}
+                          />
+
+                          <Box sx={{ 
+                            display: 'flex', flexDirection: 'column', gap: '1.2rem',
+                            opacity: profile.borderColor === 'fitzgerald' ? 0.5 : 1,
+                            pointerEvents: profile.borderColor === 'fitzgerald' ? 'none' : 'auto'
+                          }}>
+                            <Box>
+                              <Box sx={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                                {FITZGERALD_COLORS.map((c) => (
+                                  <Box
+                                    key={`border-${c.name}`}
+                                    onClick={() => updateProfile('borderColor', c.color)}
+                                    sx={{ width: '22px', height: '22px', backgroundColor: c.color, border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', '&:hover': { transform: 'scale(1.1)' } }}
+                                  />
+                                ))}
+                              </Box>
+                            </Box>
+
+                            <Box>
+                              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Color personalizado:</Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <input
+                                  type="color"
+                                  value={profile.borderColor === 'fitzgerald' ? '#CCCCCC' : profile.borderColor}
+                                  onChange={(e) => updateProfile('borderColor', e.target.value)}
+                                  style={{ width: '32px', height: '32px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}
+                                />
+                                <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+                                  {(profile.borderColor === 'fitzgerald' ? '#CCCCCC' : profile.borderColor).toUpperCase()}
+                                </Typography>
+                              </Box>
+                            </Box>
                           </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <input
-                              type="color"
-                              value={profile.borderColor}
-                              onChange={(e) => updateProfile('borderColor', e.target.value)}
-                              style={{ width: '32px', height: '32px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}
+
+                          <Box>
+                            <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Grosor del borde: {profile.borderWidth}px</Typography>
+                            <Slider
+                              size="small"
+                              value={profile.borderWidth}
+                              min={1}
+                              max={12}
+                              onChange={(_, val) => updateProfile('borderWidth', val)}
                             />
-                            <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{profile.borderColor.toUpperCase()}</Typography>
                           </Box>
                         </Box>
-                        <Box>
-                          <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Grosor: {profile.borderWidth}px</Typography>
+                      )}
+                    </Box>
+
+                    {/* Background */}
+                    <Box>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={!!profile.backgroundColor && profile.backgroundColor !== 'transparent'}
+                            onChange={(e) => updateProfile('backgroundColor', e.target.checked ? '#FFFFFF' : 'transparent')}
+                            color="primary"
+                            size="small"
+                          />
+                        }
+                        label={<Typography sx={{ fontSize: '0.9rem', fontWeight: 500 }}>Habilitar color de fondo</Typography>}
+                      />
+
+                      {profile.backgroundColor && profile.backgroundColor !== 'transparent' && (
+                        <Box sx={{ pl: 3, mt: 1, borderLeft: '2px solid', borderColor: 'primary.light', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                size="small"
+                                checked={profile.fitzgeraldEnabled}
+                                onChange={(e) => updateProfile('fitzgeraldEnabled', e.target.checked)}
+                              />
+                            }
+                            label={<Typography sx={{ fontSize: '0.8rem' }}>Usar <Link href="#" onClick={(e) => e.preventDefault()} sx={{ fontWeight: 'bold' }}>clave Fitzgerald</Link></Typography>}
+                          />
+
+                          <Box sx={{ 
+                            display: 'flex', flexDirection: 'column', gap: '1.2rem',
+                            opacity: profile.fitzgeraldEnabled ? 0.5 : 1,
+                            pointerEvents: profile.fitzgeraldEnabled ? 'none' : 'auto'
+                          }}>
+                            <Box>
+                              <Box sx={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                                {FITZGERALD_COLORS.map((c) => (
+                                  <Box
+                                    key={`bg-${c.name}`}
+                                    onClick={() => updateProfile('backgroundColor', c.color)}
+                                    sx={{ width: '22px', height: '22px', backgroundColor: c.color, border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', '&:hover': { transform: 'scale(1.1)' } }}
+                                  />
+                                ))}
+                              </Box>
+                            </Box>
+
+                            <Box>
+                              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Color personalizado:</Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <input
+                                  type="color"
+                                  value={profile.fitzgeraldEnabled ? '#FFFFFF' : profile.backgroundColor}
+                                  onChange={(e) => updateProfile('backgroundColor', e.target.value)}
+                                  style={{ width: '32px', height: '32px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}
+                                />
+                                <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+                                  {(profile.fitzgeraldEnabled ? '#FFFFFF' : profile.backgroundColor).toUpperCase()}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {/* Rounded corners */}
+                    <Box>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={profile.borderRadius > 0}
+                            onChange={(e) => updateProfile('borderRadius', e.target.checked ? 8 : 0)}
+                            color="primary"
+                            size="small"
+                          />
+                        }
+                        label={<Typography sx={{ fontSize: '0.9rem', fontWeight: 500 }}>Esquinas redondeadas</Typography>}
+                      />
+                      {profile.borderRadius > 0 && (
+                        <Box sx={{ pl: 3, mt: 1 }}>
+                          <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Radio: {profile.borderRadius}px</Typography>
                           <Slider
                             size="small"
-                            value={profile.borderWidth}
-                            min={1}
-                            max={12}
-                            onChange={(_, val) => updateProfile('borderWidth', val)}
+                            value={profile.borderRadius}
+                            min={0}
+                            max={40}
+                            onChange={(_, val) => updateProfile('borderRadius', val)}
                           />
                         </Box>
-                      </Box>
-                    )}
-                  </Box>
-
-                  <Box>
-                    <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 1 }}>Color de fondo</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <input
-                        type="color"
-                        value={profile.backgroundColor}
-                        onChange={(e) => updateProfile('backgroundColor', e.target.value)}
-                        style={{ width: '32px', height: '32px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}
-                      />
-                      <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{profile.backgroundColor.toUpperCase()}</Typography>
+                      )}
                     </Box>
-                  </Box>
 
-                  <Box>
-                    <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Bordes redondeados: {profile.borderRadius}px</Typography>
-                    <Slider
-                      size="small"
-                      value={profile.borderRadius}
-                      min={0}
-                      max={32}
-                      onChange={(_, val) => updateProfile('borderRadius', val)}
-                    />
                   </Box>
                 </AccordionDetails>
               </Accordion>

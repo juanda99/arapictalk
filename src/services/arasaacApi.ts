@@ -28,6 +28,18 @@ export const fetchPictogramData = async (keyword: string, language: string): Pro
   }
 };
 
+export const getPictoById = async (id: number, language: string) => {
+  const res = await fetch(`https://api.arasaac.org/api/pictograms/${language}/${id}`);
+  if (!res.ok) return null;
+  return res.json();
+};
+
+export const arasaacApi = {
+  getPictoUrl: getPictogramImageUrl,
+  searchPictos: fetchPictogramData,
+  getPictoById,
+};
+
 export const usePictogram = (keyword: string) => {
   const { i18n } = useTranslation();
   const language = i18n.language || 'es';
@@ -35,7 +47,7 @@ export const usePictogram = (keyword: string) => {
   return useQuery({
     queryKey: ['pictogram', language, keyword],
     queryFn: () => fetchPictogramData(keyword, language),
-    staleTime: 1000 * 60 * 60 * 24, // Cacheamos 24 horas, las imágenes de arasaac cambian raramente
-    retry: 1, // Reintento rápido
+    staleTime: 1000 * 60 * 60 * 24,
+    retry: 1,
   });
 };

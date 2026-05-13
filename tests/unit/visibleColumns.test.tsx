@@ -16,7 +16,12 @@ const mockBoardData = {
   ]
 };
 
-const TestWrapper = ({ children, initStore }: any) => {
+interface TestWrapperProps {
+  children: React.ReactNode;
+  initStore?: (store: ReturnType<typeof createStore>) => void;
+}
+
+const TestWrapper = ({ children, initStore }: TestWrapperProps) => {
   const store = createStore();
   store.set(boardDataAtom, mockBoardData);
   if (initStore) initStore(store);
@@ -31,8 +36,8 @@ const TestWrapper = ({ children, initStore }: any) => {
 test('visibleColumnsAtom: retorna columnas según el límite', () => {
   const { result } = renderHook(() => useAtomValue(visibleColumnsAtom), {
     wrapper: ({ children }) => (
-      <TestWrapper initStore={(store: any) => {
-        store.set(activeProfileAtom, { visibleColsCount: 2 });
+      <TestWrapper initStore={(store) => {
+        store.set(activeProfileAtom, { ...store.get(activeProfileAtom), visibleColsCount: 2 });
       }}>
         {children}
       </TestWrapper>
@@ -47,8 +52,8 @@ test('visibleColumnsAtom: retorna columnas según el límite', () => {
 test('visibleColumnsAtom: filtra columnas ocultas y aplica rotación circular', () => {
   const { result } = renderHook(() => useAtomValue(visibleColumnsAtom), {
     wrapper: ({ children }) => (
-      <TestWrapper initStore={(store: any) => {
-        store.set(activeProfileAtom, { visibleColsCount: 3 });
+      <TestWrapper initStore={(store) => {
+        store.set(activeProfileAtom, { ...store.get(activeProfileAtom), visibleColsCount: 3 });
         store.set(hiddenColumnsAtom, new Set(['C2'])); // Ocultamos C2
         store.set(carouselStartIndexAtom, 2); // Empezamos en el índice 2 (que será la última disponible: C4)
       }}>
