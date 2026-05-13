@@ -6,6 +6,7 @@ import { Board } from './components/Board';
 import { SentenceBar } from './components/SentenceBar';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
+import { FontLoader } from './components/FontLoader';
 import Box from '@mui/material/Box';
 
 const LandscapeGuard = ({ children }: { children: React.ReactNode }) => {
@@ -33,20 +34,23 @@ function App() {
 
   return (
     <LandscapeGuard>
+      <FontLoader />
       {!boardData ? (
-        <Landing />
-      ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', bgcolor: 'background.default', overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw' }}>
           <Header />
-          <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-            <Sidebar />
-            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              <div className="sentence-bar">
-                <SentenceBar />
-              </div>
-              <Box component="main" sx={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-                <Board />
-              </Box>
+          <Box sx={{ flex: 1, overflow: 'auto' }}>
+            <Landing />
+          </Box>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'row', height: '100vh', width: '100vw', bgcolor: 'background.default', overflow: 'hidden' }}>
+          <Sidebar />
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div className="sentence-bar">
+              <SentenceBar />
+            </div>
+            <Box component="main" sx={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+              <Board />
             </Box>
           </Box>
         </Box>
