@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { sentenceElementsAtom, activeProfileAtom } from '../store/atoms/boardState';
-import { zoomLevelAtom } from '../store/atoms/uiState';
 import { getPictogramImageUrl } from '../services/arasaacApi';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +8,7 @@ export const SentenceBar: React.FC = () => {
   const { t } = useTranslation();
   const [elements, setElements] = useAtom(sentenceElementsAtom);
   const profile = useAtomValue(activeProfileAtom);
-  const zoom = useAtomValue(zoomLevelAtom);
+  const zoom = 1.0;
 
   const cycleVariation = useCallback((idToCycle: string) => {
     setElements((prev) => 
@@ -27,7 +26,7 @@ export const SentenceBar: React.FC = () => {
     backgroundColor: profile.backgroundColor,
     border: profile.cellBorders ? `${profile.borderWidth}px solid ${profile.borderColor}` : 'none',
     borderRadius: `${profile.borderRadius}px`,
-    margin: `${profile.spacing}px auto`, // Centrado horizontal
+    margin: `${profile.spacing}px auto`,
     padding: '8px',
     display: 'flex',
     alignItems: 'center',
