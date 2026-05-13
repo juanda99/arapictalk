@@ -22,15 +22,21 @@ export interface UserProfile {
   showText: boolean;
   fontFamily: string;
   fontSize: number;
+  fontWeight?: string;
+  fontStyle?: string;
+  textDecoration?: string;
   textPosition: 'top' | 'center' | 'bottom';
   fontColor: string;
   capitalLetters: boolean;
+  secondaryTextEnabled?: boolean;
+  secondaryLanguage?: string;
   // Global - Estilo
   cellBorders: boolean;
   borderColor: string;
   borderWidth: number;
   backgroundColor: string;
   borderRadius: number;
+  fitzgeraldEnabled?: boolean;
 }
 
 export interface BoardData {
