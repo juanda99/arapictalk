@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAtom } from 'jotai';
-import { isSidebarOpenAtom } from '../store/atoms/uiState';
+import { isSidebarOpenAtom, themeModeAtom } from '../store/atoms/uiState';
 import { activeProfileAtom } from '../store/atoms/boardState';
+import { UserProfile } from '../core/types';
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -44,7 +45,6 @@ import LanguageIcon from '@mui/icons-material/Language';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import { themeModeAtom } from '../store/atoms/uiState';
 import { FONT_LIST } from '../constants/fonts';
 import { FontOption } from './FontOption';
 import languages from '../constants/languages';
@@ -239,7 +239,7 @@ export const Sidebar: React.FC = () => {
             </IconButton>
           </Tooltip>
           <Tooltip title={themeMode === 'light' ? "Modo oscuro" : "Modo claro"} placement="right">
-            <IconButton onClick={() => setThemeMode(prev => prev === 'light' ? 'dark' : 'light')} size="small" color="inherit">
+            <IconButton onClick={() => setThemeMode((prev: 'light' | 'dark') => prev === 'light' ? 'dark' : 'light')} size="small" color="inherit">
               {themeMode === 'light' ? <DarkModeIcon fontSize="small" /> : <LightModeIcon fontSize="small" />}
             </IconButton>
           </Tooltip>
