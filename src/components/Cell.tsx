@@ -38,6 +38,7 @@ export const Cell: React.FC<CellProps> = React.memo(({ keyword, columnType }) =>
 
   const primaryPictogramId = pictograms && pictograms.length > 0 ? pictograms[0]._id : null;
 
+  // Secondary text logic (translation)
   const { data: secondaryData } = useQuery({
     queryKey: ['pictogram', profile.secondaryLanguage, primaryPictogramId],
     queryFn: async () => {
@@ -50,6 +51,7 @@ export const Cell: React.FC<CellProps> = React.memo(({ keyword, columnType }) =>
     enabled: !!(profile.secondaryTextEnabled && primaryPictogramId)
   });
 
+  // Fitzgerald coloring logic
   const getBackgroundColor = () => {
     if (profile.fitzgeraldEnabled && columnType && FITZGERALD_COLORS[columnType]) {
       return FITZGERALD_COLORS[columnType];

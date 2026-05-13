@@ -1,8 +1,10 @@
 const languages = [
+    { code: 'es', label: 'Español' },
+    { code: 'en', label: 'English' },
+    { code: 'ar', label: 'عربى' },
     { code: 'an', label: 'Aragonés' },
-    { code: 'ar', label: 'عربي' },
-    { code: 'bg', label: 'Български' },
-    { code: 'br', label: 'Brezhoneg' },
+    { code: 'bg', label: 'български' },
+    { code: 'br', label: 'Português do Brasil' },
     { code: 'ca', label: 'Català' },
     { code: 'cs', label: 'Čeština' },
     { code: 'de', label: 'Deutsche' },

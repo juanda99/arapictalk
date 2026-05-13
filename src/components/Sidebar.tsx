@@ -45,6 +45,7 @@ import LanguageIcon from '@mui/icons-material/Language';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import { themeModeAtom } from '../store/atoms/uiState';
 import { FONT_LIST } from '../constants/fonts';
 import { FontOption } from './FontOption';
 import languages from '../constants/languages';
