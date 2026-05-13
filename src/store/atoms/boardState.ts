@@ -19,7 +19,7 @@ export const activeProfileAtom = atom<UserProfile>({
   visibleRowsCount: 6,
   isSquare: false,
   spacing: 3,
-  showText: true,
+  showText: false,
   fontFamily: 'Open Sans',
   fontSize: 18,
   fontWeight: 'normal',
