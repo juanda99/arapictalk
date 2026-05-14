@@ -73,7 +73,7 @@ export const Cell: React.FC<CellProps> = React.memo(({ keyword, columnType }) =>
     display: 'flex',
     flexDirection: profile.textPosition === 'top' ? 'column-reverse' : (profile.textPosition === 'bottom' ? 'column' : 'column'),
     justifyContent: profile.textPosition === 'center' ? 'center' : 'space-between',
-    padding: '4px',
+    padding: '0',
     height: '100%',
     width: '100%',
     position: 'relative'
@@ -118,7 +118,7 @@ export const Cell: React.FC<CellProps> = React.memo(({ keyword, columnType }) =>
   }
 
   return (
-    <button className="cell" onClick={handleClick} style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer', width: '100%', height: '100%' }}>
+    <button className="cell" onClick={handleClick} style={{ margin: 0, padding: 0, border: 'none', background: 'none', cursor: 'pointer', width: '100%', height: '100%', display: 'block' }}>
       <div style={cellStyle}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
           {isLoading ? (

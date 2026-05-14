@@ -45,7 +45,6 @@ import LanguageIcon from '@mui/icons-material/Language';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import { themeModeAtom } from '../store/atoms/uiState';
 import { FONT_LIST } from '../constants/fonts';
 import { FontOption } from './FontOption';
 import languages from '../constants/languages';
@@ -105,9 +104,9 @@ export const Sidebar: React.FC = () => {
       <Box 
         sx={{ 
           width: '72px', 
-          bgcolor: 'background.paper', 
+          bgcolor: themeMode === 'dark' ? '#25282b' : 'background.paper', 
           borderRight: 1, 
-          borderColor: 'divider',
+          borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -124,12 +123,12 @@ export const Sidebar: React.FC = () => {
             onClick={() => handleNavClick('settings')}
             sx={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%',
-              cursor: 'pointer', color: 'text.secondary', p: '0.5rem',
-              bgcolor: (isOpen && sidebarMode === 'settings') ? 'background.default' : 'transparent',
+              cursor: 'pointer', color: themeMode === 'dark' ? 'rgba(255,255,255,0.7)' : 'text.secondary', p: '0.5rem',
+              bgcolor: (isOpen && sidebarMode === 'settings') ? (themeMode === 'dark' ? '#1a1c1e' : 'background.default') : 'transparent',
               borderTop: 1, borderBottom: 1,
-              borderColor: (isOpen && sidebarMode === 'settings') ? 'divider' : 'transparent',
+              borderColor: (isOpen && sidebarMode === 'settings') ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider') : 'transparent',
               borderLeft: (isOpen && sidebarMode === 'settings') ? '3px solid #1976d2' : '3px solid transparent',
-              boxShadow: (theme) => (isOpen && sidebarMode === 'settings') ? `1px 0 0 ${theme.palette.background.default}` : 'none',
+              boxShadow: (theme) => (isOpen && sidebarMode === 'settings') ? `1px 0 0 ${themeMode === 'dark' ? '#1a1c1e' : theme.palette.background.default}` : 'none',
               transition: 'all 0.2s',
               position: 'relative', zIndex: (isOpen && sidebarMode === 'settings') ? 2 : 1,
             }}
@@ -145,12 +144,12 @@ export const Sidebar: React.FC = () => {
             onClick={() => handleNavClick('local')}
             sx={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%',
-              cursor: 'pointer', color: 'text.secondary', p: '0.5rem',
-              bgcolor: (isOpen && sidebarMode === 'local') ? 'background.default' : 'transparent',
+              cursor: 'pointer', color: themeMode === 'dark' ? 'rgba(255,255,255,0.7)' : 'text.secondary', p: '0.5rem',
+              bgcolor: (isOpen && sidebarMode === 'local') ? (themeMode === 'dark' ? '#1a1c1e' : 'background.default') : 'transparent',
               borderTop: 1, borderBottom: 1,
-              borderColor: (isOpen && sidebarMode === 'local') ? 'divider' : 'transparent',
+              borderColor: (isOpen && sidebarMode === 'local') ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider') : 'transparent',
               borderLeft: (isOpen && sidebarMode === 'local') ? '3px solid #ff9800' : '3px solid transparent',
-              boxShadow: (theme) => (isOpen && sidebarMode === 'local') ? `1px 0 0 ${theme.palette.background.default}` : 'none',
+              boxShadow: (theme) => (isOpen && sidebarMode === 'local') ? `1px 0 0 ${themeMode === 'dark' ? '#1a1c1e' : theme.palette.background.default}` : 'none',
               transition: 'all 0.2s',
               position: 'relative', zIndex: (isOpen && sidebarMode === 'local') ? 2 : 1,
             }}
@@ -218,15 +217,15 @@ export const Sidebar: React.FC = () => {
         }}>
           <Tooltip title="Deshacer" placement="right">
             <span>
-              <IconButton size="medium" disabled color="primary" sx={{ bgcolor: 'rgba(0,0,0,0.04)' }}>
-                <UndoIcon fontSize="medium" />
+              <IconButton size="medium" disabled color="primary" sx={{ bgcolor: themeMode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}>
+                <UndoIcon fontSize="medium" sx={{ color: themeMode === 'dark' ? 'rgba(255,255,255,0.3)' : 'inherit' }} />
               </IconButton>
             </span>
           </Tooltip>
           <Tooltip title="Rehacer" placement="right">
             <span>
-              <IconButton size="medium" disabled color="primary" sx={{ bgcolor: 'rgba(0,0,0,0.04)' }}>
-                <RedoIcon fontSize="medium" />
+              <IconButton size="medium" disabled color="primary" sx={{ bgcolor: themeMode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }}>
+                <RedoIcon fontSize="medium" sx={{ color: themeMode === 'dark' ? 'rgba(255,255,255,0.3)' : 'inherit' }} />
               </IconButton>
             </span>
           </Tooltip>
@@ -240,22 +239,22 @@ export const Sidebar: React.FC = () => {
             </IconButton>
           </Tooltip>
           <Tooltip title={themeMode === 'light' ? "Modo oscuro" : "Modo claro"} placement="right">
-            <IconButton onClick={() => setThemeMode((prev: 'light' | 'dark') => prev === 'light' ? 'dark' : 'light')} size="small" color="inherit">
+            <IconButton onClick={() => setThemeMode((prev: 'light' | 'dark') => prev === 'light' ? 'dark' : 'light')} size="small" sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }}>
               {themeMode === 'light' ? <DarkModeIcon fontSize="small" /> : <LightModeIcon fontSize="small" />}
             </IconButton>
           </Tooltip>
           <Tooltip title="Informar de un error" placement="right">
-            <IconButton size="small" color="inherit">
+            <IconButton size="small" sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }}>
               <BugReportIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Idioma" placement="right">
-            <IconButton size="small" color="inherit">
+            <IconButton size="small" sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }}>
               <LanguageIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Perfil" placement="right">
-            <IconButton size="small" color="inherit">
+            <IconButton size="small" sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }}>
               <AccountCircleIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -268,12 +267,12 @@ export const Sidebar: React.FC = () => {
           width: isOpen ? { xs: 'calc(100vw - 72px)', sm: '300px', lg: '352px' } : 0, 
           overflow: 'hidden', 
           transition: 'width 0.3s ease',
-          bgcolor: 'background.default',
+          bgcolor: themeMode === 'dark' ? '#1a1c1e' : 'background.default',
           display: 'flex',
           flexDirection: 'column',
           flexShrink: 0,
           borderRight: isOpen ? 1 : 0,
-          borderColor: 'divider',
+          borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider',
           boxShadow: 8,
           position: 'relative'
         }}
@@ -285,22 +284,26 @@ export const Sidebar: React.FC = () => {
             alignItems: 'center', 
             justifyContent: 'space-between',
             borderBottom: 1, 
-            borderColor: 'divider',
+            borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider',
             minHeight: '40px',
-            bgcolor: 'background.paper'
+            bgcolor: themeMode === 'dark' ? '#25282b' : 'background.paper'
           }}>
             {sidebarMode === 'settings' ? (
               <Tabs
                 value={tabIndex}
                 onChange={(_, val) => setTabIndex(val)}
                 variant="fullWidth"
-                sx={{ minHeight: '40px', flex: 1 }}
+                sx={{ 
+                  minHeight: '40px', flex: 1,
+                  '& .MuiTab-root': { color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'inherit' },
+                  '& .Mui-selected': { color: themeMode === 'dark' ? '#fff !important' : 'inherit' }
+                }}
               >
                 <Tab label="Documento" sx={{ minHeight: '40px', py: 0, textTransform: 'none', fontWeight: 'bold' }} />
                 <Tab label="Global" sx={{ minHeight: '40px', py: 0, textTransform: 'none', fontWeight: 'bold' }} />
               </Tabs>
             ) : (
-              <Typography variant="subtitle2" sx={{ px: 2, fontWeight: 'bold', color: 'text.secondary', textTransform: 'uppercase' }}>
+              <Typography variant="subtitle2" sx={{ px: 2, fontWeight: 'bold', color: themeMode === 'dark' ? '#fff' : 'text.secondary', textTransform: 'uppercase' }}>
                 {sidebarMode === 'library' ? 'Pictogramas' : 
                  sidebarMode === 'local' ? 'Mis Imágenes' : 
                  sidebarMode === 'templates' ? 'Actividades' : ''}
@@ -309,7 +312,7 @@ export const Sidebar: React.FC = () => {
             <IconButton 
               size="small" 
               onClick={() => setIsOpen(false)} 
-              sx={{ mr: 1, color: 'text.secondary' }}
+              sx={{ mr: 1, color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary' }}
             >
               <CloseIcon fontSize="small" />
             </IconButton>
@@ -319,7 +322,10 @@ export const Sidebar: React.FC = () => {
         {sidebarMode === 'settings' && (
           <>
             {/* Documento Tab Content */}
-            <Box sx={{ overflowY: 'auto', flex: 1, display: tabIndex === 0 ? 'flex' : 'none', flexDirection: 'column', gap: 3, p: 2 }}>
+            <Box sx={{ 
+              overflowY: 'auto', flex: 1, display: tabIndex === 0 ? 'flex' : 'none', flexDirection: 'column', gap: 3, p: 2,
+              color: themeMode === 'dark' ? '#fff' : 'inherit'
+            }}>
               <Box>
                 <Typography gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
                   Filas <strong>{profile.visibleRowsCount}</strong>
@@ -357,13 +363,23 @@ export const Sidebar: React.FC = () => {
                       size="small"
                       checked={profile.isSquare}
                       onChange={(e) => updateProfile('isSquare', e.target.checked)}
+                      sx={{ color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'inherit' }}
                     />
                   }
                   label={<Typography variant="body2" sx={{ fontWeight: 500 }}>Celdas cuadradas</Typography>}
                 />
               </Box>
 
-              <Alert severity="info" variant="outlined" sx={{ borderStyle: 'dashed', mt: 0 }}>
+              <Alert 
+                severity="info" 
+                variant="outlined" 
+                sx={{ 
+                  borderStyle: 'dashed', mt: 0,
+                  bgcolor: themeMode === 'dark' ? 'rgba(3, 169, 244, 0.1)' : 'inherit',
+                  color: themeMode === 'dark' ? '#81d4fa' : 'inherit',
+                  borderColor: themeMode === 'dark' ? 'rgba(129, 212, 250, 0.5)' : 'inherit'
+                }}
+              >
                 <Typography variant="caption" sx={{ display: 'block', lineHeight: 1.2 }}>
                   El tamaño de las celdas se ajusta automáticamente para llenar la página.
                 </Typography>
@@ -385,15 +401,23 @@ export const Sidebar: React.FC = () => {
             </Box>
 
             {/* Global Tab Content */}
-            <Box sx={{ overflowY: 'auto', flex: 1, display: tabIndex === 1 ? 'flex' : 'none', flexDirection: 'column', pb: 4 }}>
-              <Box sx={{ m: 2, p: 2, bgcolor: '#e8f5e9', borderRadius: '8px', borderLeft: '4px solid #4caf50' }}>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#2e7d32', mb: 0.5 }}>
+            <Box sx={{ 
+              overflowY: 'auto', flex: 1, display: tabIndex === 1 ? 'flex' : 'none', flexDirection: 'column', pb: 4,
+              color: themeMode === 'dark' ? '#fff' : 'inherit'
+            }}>
+              <Box sx={{ 
+                m: 2, p: 2, 
+                bgcolor: themeMode === 'dark' ? 'rgba(76, 175, 80, 0.1)' : '#e8f5e9', 
+                borderRadius: '8px', 
+                borderLeft: '4px solid #4caf50' 
+              }}>
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: themeMode === 'dark' ? '#81c784' : '#2e7d32', mb: 0.5 }}>
                   Ajustes globales
                 </Typography>
-                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                <Typography variant="caption" sx={{ color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', display: 'block' }}>
                   Estos ajustes afectan a todo el tablero a menos que se cambie una celda individualmente.
                 </Typography>
-                <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 'bold', mt: 1, display: 'block' }}>
+                <Typography variant="caption" sx={{ color: themeMode === 'dark' ? '#90caf9' : 'primary.main', fontWeight: 'bold', mt: 1, display: 'block' }}>
                   Afectando a: Todo el proyecto
                 </Typography>
               </Box>
@@ -403,10 +427,16 @@ export const Sidebar: React.FC = () => {
                 expanded={expandedSection === 'text'} 
                 onChange={handleAccordionChange('text')}
                 elevation={0} 
-                sx={{ bgcolor: 'transparent', '&:before': { display: 'none' }, borderBottom: '1px solid', borderColor: 'divider' }}
+                sx={{ 
+                  bgcolor: 'transparent', 
+                  '&:before': { display: 'none' }, 
+                  borderBottom: '1px solid', 
+                  borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider',
+                  color: 'inherit'
+                }}
               >
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography sx={{ fontSize: '0.9rem', color: '#1976d2', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }} />}>
+                  <Typography sx={{ fontSize: '0.9rem', color: themeMode === 'dark' ? '#64b5f6' : '#1976d2', fontWeight: 'bold', textTransform: 'uppercase' }}>
                     Texto
                   </Typography>
                 </AccordionSummary>
@@ -425,7 +455,7 @@ export const Sidebar: React.FC = () => {
                   {profile.showText && (
                     <>
                       <Box>
-                        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 1 }}>Fuente</Typography>
+                        <Typography sx={{ fontSize: '0.8rem', color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', mb: 1 }}>Fuente</Typography>
                         <Autocomplete
                           size="small"
                           options={FONT_LIST}
@@ -434,12 +464,17 @@ export const Sidebar: React.FC = () => {
                           renderOption={(props, option) => (
                             <FontOption key={option} props={props} option={option} />
                           )}
-                          renderInput={(params) => <TextField {...params} size="small" />}
+                          renderInput={(params) => <TextField {...params} size="small" sx={{ 
+                            '& .MuiOutlinedInput-root': {
+                              color: themeMode === 'dark' ? '#fff' : 'inherit',
+                              '& fieldset': { borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.2)' : 'inherit' }
+                            }
+                          }} />}
                         />
                       </Box>
 
                       <Box>
-                        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 1 }}>
+                        <Typography sx={{ fontSize: '0.8rem', color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', mb: 1 }}>
                           Tamaño de fuente: {profile.fontSize}px
                         </Typography>
                         <Slider
@@ -458,8 +493,8 @@ export const Sidebar: React.FC = () => {
                             onClick={() => updateProfile('fontWeight', profile.fontWeight === 'bold' ? 'normal' : 'bold')}
                             sx={{ 
                               borderRadius: 0, p: 1, 
-                              bgcolor: profile.fontWeight === 'bold' ? 'action.selected' : 'transparent',
-                              color: profile.fontWeight === 'bold' ? 'primary.main' : 'text.secondary'
+                              bgcolor: profile.fontWeight === 'bold' ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'action.selected') : 'transparent',
+                              color: profile.fontWeight === 'bold' ? (themeMode === 'dark' ? '#fff' : 'primary.main') : (themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary')
                             }}
                           >
                             <FormatBoldIcon fontSize="small" />
@@ -467,9 +502,9 @@ export const Sidebar: React.FC = () => {
                           <IconButton 
                             onClick={() => updateProfile('fontStyle', profile.fontStyle === 'italic' ? 'normal' : 'italic')}
                             sx={{ 
-                              borderRadius: 0, p: 1, borderLeft: '1px solid', borderRight: '1px solid', borderColor: 'divider',
-                              bgcolor: profile.fontStyle === 'italic' ? 'action.selected' : 'transparent',
-                              color: profile.fontStyle === 'italic' ? 'primary.main' : 'text.secondary'
+                              borderRadius: 0, p: 1, borderLeft: '1px solid', borderRight: '1px solid', borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider',
+                              bgcolor: profile.fontStyle === 'italic' ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'action.selected') : 'transparent',
+                              color: profile.fontStyle === 'italic' ? (themeMode === 'dark' ? '#fff' : 'primary.main') : (themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary')
                             }}
                           >
                             <FormatItalicIcon fontSize="small" />
@@ -478,8 +513,8 @@ export const Sidebar: React.FC = () => {
                             onClick={() => updateProfile('textDecoration', profile.textDecoration === 'underline' ? 'none' : 'underline')}
                             sx={{ 
                               borderRadius: 0, p: 1,
-                              bgcolor: profile.textDecoration === 'underline' ? 'action.selected' : 'transparent',
-                              color: profile.textDecoration === 'underline' ? 'primary.main' : 'text.secondary'
+                              bgcolor: profile.textDecoration === 'underline' ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'action.selected') : 'transparent',
+                              color: profile.textDecoration === 'underline' ? (themeMode === 'dark' ? '#fff' : 'primary.main') : (themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary')
                             }}
                           >
                             <FormatUnderlinedIcon fontSize="small" />
@@ -488,15 +523,15 @@ export const Sidebar: React.FC = () => {
                       </Box>
 
                       <Box>
-                        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 1 }}>Posición del texto</Typography>
-                        <Box sx={{ display: 'flex', border: '1px solid', borderColor: 'divider', borderRadius: '6px', overflow: 'hidden', width: 'fit-content' }}>
+                        <Typography sx={{ fontSize: '0.8rem', color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', mb: 1 }}>Posición del texto</Typography>
+                        <Box sx={{ display: 'flex', border: '1px solid', borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider', borderRadius: '6px', overflow: 'hidden', width: 'fit-content' }}>
                           <Tooltip title="Arriba">
                             <IconButton
                               onClick={() => updateProfile('textPosition', 'top')}
                               sx={{ 
                                 borderRadius: 0,
-                                bgcolor: profile.textPosition === 'top' ? 'action.selected' : 'transparent',
-                                color: profile.textPosition === 'top' ? 'primary.main' : 'text.secondary',
+                                bgcolor: profile.textPosition === 'top' ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'action.selected') : 'transparent',
+                                color: profile.textPosition === 'top' ? (themeMode === 'dark' ? '#fff' : 'primary.main') : (themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary'),
                               }}
                             >
                               <FormatAlignTopIcon fontSize="small" />
@@ -507,8 +542,8 @@ export const Sidebar: React.FC = () => {
                               onClick={() => updateProfile('textPosition', 'center')}
                               sx={{ 
                                 borderRadius: 0,
-                                bgcolor: profile.textPosition === 'center' ? 'action.selected' : 'transparent',
-                                color: profile.textPosition === 'center' ? 'primary.main' : 'text.secondary',
+                                bgcolor: profile.textPosition === 'center' ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'action.selected') : 'transparent',
+                                color: profile.textPosition === 'center' ? (themeMode === 'dark' ? '#fff' : 'primary.main') : (themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary'),
                               }}
                             >
                               <FormatAlignCenterIcon fontSize="small" />
@@ -519,8 +554,8 @@ export const Sidebar: React.FC = () => {
                               onClick={() => updateProfile('textPosition', 'bottom')}
                               sx={{ 
                                 borderRadius: 0,
-                                bgcolor: profile.textPosition === 'bottom' ? 'action.selected' : 'transparent',
-                                color: profile.textPosition === 'bottom' ? 'primary.main' : 'text.secondary',
+                                bgcolor: profile.textPosition === 'bottom' ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'action.selected') : 'transparent',
+                                color: profile.textPosition === 'bottom' ? (themeMode === 'dark' ? '#fff' : 'primary.main') : (themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary'),
                               }}
                             >
                               <FormatAlignBottomIcon fontSize="small" />
@@ -545,16 +580,21 @@ export const Sidebar: React.FC = () => {
                         />
 
                         {profile.secondaryTextEnabled && (
-                          <Box sx={{ pl: 2, mt: 1, display: 'flex', flexDirection: 'column', gap: 1, borderLeft: '2px solid', borderColor: 'primary.light' }}>
+                          <Box sx={{ pl: 2, mt: 1, display: 'flex', flexDirection: 'column', gap: 1, borderLeft: '2px solid', borderColor: themeMode === 'dark' ? '#64b5f6' : 'primary.light' }}>
                             <Box>
-                              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Idioma:</Typography>
+                              <Typography sx={{ fontSize: '0.75rem', color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', mb: 0.5 }}>Idioma:</Typography>
                               <Autocomplete
                                 size="small"
                                 options={languages}
                                 getOptionLabel={(option) => option.label}
                                 value={languages.find(l => l.code === (profile.secondaryLanguage || 'en')) || languages[1]}
                                 onChange={(_, val) => updateProfile('secondaryLanguage', val?.code || 'en')}
-                                renderInput={(params) => <TextField {...params} size="small" />}
+                                renderInput={(params) => <TextField {...params} size="small" sx={{ 
+                                  '& .MuiOutlinedInput-root': {
+                                    color: themeMode === 'dark' ? '#fff' : 'inherit',
+                                    '& fieldset': { borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.2)' : 'inherit' }
+                                  }
+                                }} />}
                               />
                             </Box>
                           </Box>
@@ -562,17 +602,17 @@ export const Sidebar: React.FC = () => {
                       </Box>
 
                       <Box>
-                        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 1 }}>Color de fuente</Typography>
+                        <Typography sx={{ fontSize: '0.8rem', color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', mb: 1 }}>Color de fuente</Typography>
                         <Box sx={{ display: 'flex', gap: '4px', flexWrap: 'wrap', mb: 1 }}>
                           <Box
                             onClick={() => updateProfile('fontColor', '#000000')}
-                            sx={{ width: '22px', height: '22px', backgroundColor: '#000000', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' }}
+                            sx={{ width: '22px', height: '22px', backgroundColor: '#000000', border: '1px solid', borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.3)' : '#ccc', borderRadius: '4px', cursor: 'pointer' }}
                           />
                           {FITZGERALD_COLORS.map((c) => (
                             <Box
                               key={c.name}
                               onClick={() => updateProfile('fontColor', c.color)}
-                              sx={{ width: '22px', height: '22px', backgroundColor: c.color, border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' }}
+                              sx={{ width: '22px', height: '22px', backgroundColor: c.color, border: '1px solid', borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.3)' : '#ccc', borderRadius: '4px', cursor: 'pointer' }}
                             />
                           ))}
                         </Box>
@@ -583,7 +623,7 @@ export const Sidebar: React.FC = () => {
                             onChange={(e) => updateProfile('fontColor', e.target.value)}
                             style={{ width: '32px', height: '32px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}
                           />
-                          <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{profile.fontColor.toUpperCase()}</Typography>
+                          <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'inherit' }}>{profile.fontColor.toUpperCase()}</Typography>
                         </Box>
                       </Box>
 
@@ -607,10 +647,16 @@ export const Sidebar: React.FC = () => {
                 expanded={expandedSection === 'style'} 
                 onChange={handleAccordionChange('style')}
                 elevation={0} 
-                sx={{ bgcolor: 'transparent', '&:before': { display: 'none' }, borderBottom: '1px solid', borderColor: 'divider' }}
+                sx={{ 
+                  bgcolor: 'transparent', 
+                  '&:before': { display: 'none' }, 
+                  borderBottom: '1px solid', 
+                  borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider',
+                  color: 'inherit'
+                }}
               >
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography sx={{ fontSize: '0.9rem', color: '#1976d2', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }} />}>
+                  <Typography sx={{ fontSize: '0.9rem', color: themeMode === 'dark' ? '#64b5f6' : '#1976d2', fontWeight: 'bold', textTransform: 'uppercase' }}>
                     Estilo
                   </Typography>
                 </AccordionSummary>
@@ -632,16 +678,17 @@ export const Sidebar: React.FC = () => {
                       />
 
                       {profile.cellBorders && (
-                        <Box sx={{ pl: 3, mt: 1, borderLeft: '2px solid', borderColor: 'primary.light', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <Box sx={{ pl: 3, mt: 1, borderLeft: '2px solid', borderColor: themeMode === 'dark' ? '#64b5f6' : 'primary.light', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                           <FormControlLabel
                             control={
                               <Checkbox
                                 size="small"
                                 checked={profile.borderColor === 'fitzgerald'}
                                 onChange={(e) => updateProfile('borderColor', e.target.checked ? 'fitzgerald' : '#CCCCCC')}
+                                sx={{ color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'inherit' }}
                               />
                             }
-                            label={<Typography sx={{ fontSize: '0.8rem' }}>Usar <Link href="#" onClick={(e) => e.preventDefault()} sx={{ fontWeight: 'bold' }}>clave Fitzgerald</Link></Typography>}
+                            label={<Typography sx={{ fontSize: '0.8rem' }}>Usar <Link href="#" onClick={(e) => e.preventDefault()} sx={{ fontWeight: 'bold', color: themeMode === 'dark' ? '#90caf9' : 'primary.main' }}>clave Fitzgerald</Link></Typography>}
                           />
 
                           <Box sx={{ 
@@ -655,14 +702,14 @@ export const Sidebar: React.FC = () => {
                                   <Box
                                     key={`border-${c.name}`}
                                     onClick={() => updateProfile('borderColor', c.color)}
-                                    sx={{ width: '22px', height: '22px', backgroundColor: c.color, border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', '&:hover': { transform: 'scale(1.1)' } }}
+                                    sx={{ width: '22px', height: '22px', backgroundColor: c.color, border: '1px solid', borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.3)' : '#ccc', borderRadius: '4px', cursor: 'pointer', '&:hover': { transform: 'scale(1.1)' } }}
                                   />
                                 ))}
                               </Box>
                             </Box>
 
                             <Box>
-                              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Color personalizado:</Typography>
+                              <Typography sx={{ fontSize: '0.75rem', color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', mb: 0.5 }}>Color personalizado:</Typography>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <input
                                   type="color"
@@ -670,7 +717,7 @@ export const Sidebar: React.FC = () => {
                                   onChange={(e) => updateProfile('borderColor', e.target.value)}
                                   style={{ width: '32px', height: '32px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}
                                 />
-                                <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+                                <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'inherit' }}>
                                   {(profile.borderColor === 'fitzgerald' ? '#CCCCCC' : profile.borderColor).toUpperCase()}
                                 </Typography>
                               </Box>
@@ -678,7 +725,7 @@ export const Sidebar: React.FC = () => {
                           </Box>
 
                           <Box>
-                            <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Grosor del borde: {profile.borderWidth}px</Typography>
+                            <Typography sx={{ fontSize: '0.75rem', color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', mb: 0.5 }}>Grosor del borde: {profile.borderWidth}px</Typography>
                             <Slider
                               size="small"
                               value={profile.borderWidth}
@@ -706,16 +753,17 @@ export const Sidebar: React.FC = () => {
                       />
 
                       {profile.backgroundColor && profile.backgroundColor !== 'transparent' && (
-                        <Box sx={{ pl: 3, mt: 1, borderLeft: '2px solid', borderColor: 'primary.light', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <Box sx={{ pl: 3, mt: 1, borderLeft: '2px solid', borderColor: themeMode === 'dark' ? '#64b5f6' : 'primary.light', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                           <FormControlLabel
                             control={
                               <Checkbox
                                 size="small"
                                 checked={profile.fitzgeraldEnabled}
                                 onChange={(e) => updateProfile('fitzgeraldEnabled', e.target.checked)}
+                                sx={{ color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'inherit' }}
                               />
                             }
-                            label={<Typography sx={{ fontSize: '0.8rem' }}>Usar <Link href="#" onClick={(e) => e.preventDefault()} sx={{ fontWeight: 'bold' }}>clave Fitzgerald</Link></Typography>}
+                            label={<Typography sx={{ fontSize: '0.8rem' }}>Usar <Link href="#" onClick={(e) => e.preventDefault()} sx={{ fontWeight: 'bold', color: themeMode === 'dark' ? '#90caf9' : 'primary.main' }}>clave Fitzgerald</Link></Typography>}
                           />
 
                           <Box sx={{ 
@@ -729,14 +777,14 @@ export const Sidebar: React.FC = () => {
                                   <Box
                                     key={`bg-${c.name}`}
                                     onClick={() => updateProfile('backgroundColor', c.color)}
-                                    sx={{ width: '22px', height: '22px', backgroundColor: c.color, border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', '&:hover': { transform: 'scale(1.1)' } }}
+                                    sx={{ width: '22px', height: '22px', backgroundColor: c.color, border: '1px solid', borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.3)' : '#ccc', borderRadius: '4px', cursor: 'pointer', '&:hover': { transform: 'scale(1.1)' } }}
                                   />
                                 ))}
                               </Box>
                             </Box>
 
                             <Box>
-                              <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Color personalizado:</Typography>
+                              <Typography sx={{ fontSize: '0.75rem', color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', mb: 0.5 }}>Color personalizado:</Typography>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <input
                                   type="color"
@@ -744,7 +792,7 @@ export const Sidebar: React.FC = () => {
                                   onChange={(e) => updateProfile('backgroundColor', e.target.value)}
                                   style={{ width: '32px', height: '32px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}
                                 />
-                                <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+                                <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'inherit' }}>
                                   {(profile.fitzgeraldEnabled ? '#FFFFFF' : profile.backgroundColor).toUpperCase()}
                                 </Typography>
                               </Box>
@@ -769,7 +817,7 @@ export const Sidebar: React.FC = () => {
                       />
                       {profile.borderRadius > 0 && (
                         <Box sx={{ pl: 3, mt: 1 }}>
-                          <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>Radio: {profile.borderRadius}px</Typography>
+                          <Typography sx={{ fontSize: '0.75rem', color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'text.secondary', mb: 0.5 }}>Radio: {profile.borderRadius}px</Typography>
                           <Slider
                             size="small"
                             value={profile.borderRadius}

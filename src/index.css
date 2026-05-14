@@ -2,7 +2,6 @@
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --sentence-height: 100px;
 }
 
 body, html {
@@ -10,8 +9,14 @@ body, html {
   padding: 0;
   width: 100dvw;
   height: 100dvh;
-  overflow: hidden; /* Evitar scroll en el body, manejado por columnas */
+  overflow: hidden;
   background-color: #f5f5f5;
+}
+
+/* Browser button reset — removes Firefox's default 0.5em margin */
+button {
+  margin: 0;
+  padding: 0;
 }
 
 #root {
@@ -19,115 +24,26 @@ body, html {
   height: 100%;
 }
 
-:root {
-  --sentence-height: 120px;
-}
-
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  background-color: #fff;
-}
-
-.sentence-bar {
-  min-height: var(--sentence-height);
-  height: auto;
-  display: flex;
-  align-items: center;
-  z-index: 10;
-}
-
-.sentence-bar-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.sentence-bar-container::-webkit-scrollbar {
+/* Global resets for board components to avoid conflicts with dynamic styles */
+.sentence-bar-container::-webkit-scrollbar,
+.board-grid::-webkit-scrollbar,
+.scroll-area::-webkit-scrollbar {
   display: none;
 }
 
-.sentence-items {
-  display: flex;
-  gap: 8px;
-  height: 100%;
-  align-items: center;
+.sentence-bar-container,
+.board-grid,
+.scroll-area {
+  scrollbar-width: none;
 }
-
-.sentence-item {
-  height: 90%;
-  aspect-ratio: 1/1;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  box-sizing: border-box;
-  cursor: pointer;
-  position: relative;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.sentence-item:active {
-  background: #f0f0f0;
-}
-
-.sentence-img, .sentence-no-image {
-  width: 60%;
-  aspect-ratio: 1/1;
-  object-fit: contain;
-}
-
-.sentence-text {
-  font-size: 0.8rem;
-  font-weight: bold;
-  margin-top: 4px;
-  text-align: center;
-  line-height: 1;
-}
-
-.variation-indicator {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  font-size: 0.6rem;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-.sentence-placeholder {
-  font-size: 1.5rem;
-  color: #666;
-}
-
-
 
 .board-grid {
-  flex: 1;
   display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  gap: 0;
-  padding: 0;
-  scroll-behavior: smooth;
-  /* Ocultar barra de scroll horizontal para limpieza táctil */
-  scrollbar-width: none;
-}
-.board-grid::-webkit-scrollbar {
-  display: none;
+  height: 100%;
+  width: 100%;
 }
 
 .column {
-  flex: 0 0 calc(100vw / var(--col-count, 8));
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -137,26 +53,10 @@ body, html {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  height: 100%;
-  scrollbar-width: none;
-}
-.scroll-area::-webkit-scrollbar {
-  display: none;
 }
 
 .cell-wrapper {
   box-sizing: border-box;
-}
-
-.cell {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  transition: background-color 0.1s;
-}
-
-.cell:active {
-  background: #f0f0f0;
 }
 
 .skeleton-image {
