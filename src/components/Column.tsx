@@ -1,12 +1,11 @@
-import React, { useRef } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import React from 'react';
 import { useAtomValue, useAtom } from 'jotai';
 import { Cell } from './Cell';
 import type { ColumnData } from '../core/types';
 import { activeProfileAtom, boardDataAtom, columnIndicesAtom } from '../store/atoms/boardState';
 import IconButton from '@mui/material/IconButton';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import Tooltip from '@mui/material/Tooltip';
+import { layoutMetricsAtom } from '../store/selectors/layoutMetrics';
 
 interface Props {
   data: ColumnData;
@@ -14,121 +13,107 @@ interface Props {
   colWidth: number;
 }
 
-export const Column: React.FC<Props> = ({ data, slotIndex, colWidth }) => {
-  const parentRef = useRef<HTMLDivElement>(null);
+export const Column: React.FC<Props> = ({ data, slotIndex }) => {
   const profile = useAtomValue(activeProfileAtom);
   const boardData = useAtomValue(boardDataAtom);
   const [indices, setIndices] = useAtom(columnIndicesAtom);
+  const { rowHeight, headerBarHeight } = useAtomValue(layoutMetricsAtom);
 
   const handleCycle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!boardData) return;
-    
     const totalCols = boardData.columnas.length;
     if (totalCols <= profile.visibleColsCount) return;
-
     const newIndices = [...indices];
     let nextIdx = (newIndices[slotIndex] + 1) % totalCols;
-    
-    while (newIndices.includes(nextIdx)) {
-      nextIdx = (nextIdx + 1) % totalCols;
-    }
-    
+    while (newIndices.includes(nextIdx)) nextIdx = (nextIdx + 1) % totalCols;
     newIndices[slotIndex] = nextIdx;
     setIndices(newIndices);
   };
-  
-  const headerHeight = 48;
-  const availableHeight = window.innerHeight - 64 - 120;
-  
-  const estimatedHeight = Math.floor(profile.isSquare 
-    ? colWidth 
-    : (availableHeight - headerHeight) / profile.visibleRowsCount);
 
-  const rowVirtualizer = useVirtualizer({
-    count: data.contenido.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => estimatedHeight,
-    overscan: 4, 
-  });
-
-  React.useEffect(() => {
-    rowVirtualizer.measure();
-  }, [estimatedHeight, rowVirtualizer]);
-
-  const headerCellStyle: React.CSSProperties = {
-    backgroundColor: '#fafafa', 
-    border: profile.cellBorders ? `${profile.borderWidth}px solid ${profile.borderColor}` : 'none',
-    borderBottom: '2px solid #eee',
-    borderRadius: `${profile.borderRadius}px`,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-    width: '100%',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-  };
-
-  const headerTextStyle: React.CSSProperties = {
-    fontSize: `calc(${profile.fontSize}px * 0.8)`,
-    color: '#666',
-    fontFamily: profile.fontFamily,
-    textTransform: profile.capitalLetters ? 'uppercase' : 'none',
-    fontWeight: 700,
-    textAlign: 'center',
-    width: '100%',
-    lineHeight: '1.1',
-    wordBreak: 'break-word'
-  };
+  const sp = profile.spacing;
+  const canCycle = !!(boardData && boardData.columnas.length > profile.visibleColsCount);
 
   return (
-    <div 
-      className="column" 
-      style={{ 
-        width: `${colWidth}px`,
-        minWidth: `${colWidth}px`,
-        maxWidth: `${colWidth}px`,
-        display: 'flex', 
-        flexDirection: 'column' 
+    <div
+      style={{
+        width: `${100 / profile.visibleColsCount}%`,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        paddingLeft: `${sp / 2}px`,
+        paddingRight: `${sp / 2}px`,
+        boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
     >
-      <div className="cell-wrapper" style={{ height: `${headerHeight}px`, padding: `${profile.spacing}px`, flexShrink: 0 }}>
-        <div style={headerCellStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', width: '100%', justifyContent: 'center', padding: '0 4px' }}>
-            <Tooltip title={data.tipo}>
-              <span style={headerTextStyle}>
-                {data.tipo}
-              </span>
-            </Tooltip>
-            {boardData && boardData.columnas.length > profile.visibleColsCount && (
-              <IconButton size="small" onClick={handleCycle} sx={{ p: 0.2, color: 'primary.main', bgcolor: 'rgba(139, 195, 74, 0.1)' }}>
-                <SwapHorizIcon sx={{ fontSize: '1rem' }} />
-              </IconButton>
-            )}
-          </div>
-        </div>
+      {/* ── Compact category separator bar (FIXED) ── */}
+      <div
+        style={{
+          height: `${headerBarHeight}px`,
+          marginTop: `${sp}px`,
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '4px',
+          paddingLeft: '6px',
+          paddingRight: '6px',
+          borderRadius: `${profile.borderRadius}px`,
+          backgroundColor: '#8bc34a',
+          overflow: 'hidden',
+        }}
+      >
+        <span
+          style={{
+            fontSize: `calc(${profile.fontSize}px * 0.75)`,
+            color: '#fff',
+            fontFamily: profile.fontFamily,
+            textTransform: profile.capitalLetters ? 'uppercase' : 'none',
+            fontWeight: 700,
+            textAlign: 'center',
+            flex: 1,
+            lineHeight: 1.15,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            wordBreak: 'break-word',
+          }}
+          title={data.tipo}
+        >
+          {data.tipo}
+        </span>
+        {canCycle && (
+          <IconButton
+            size="small"
+            onClick={handleCycle}
+            sx={{ p: 0.3, flexShrink: 0, color: 'primary.main', opacity: 0.7, '&:hover': { opacity: 1 } }}
+          >
+            <SwapHorizIcon sx={{ fontSize: '0.9rem' }} />
+          </IconButton>
+        )}
       </div>
-      
-      <div ref={parentRef} className="scroll-area">
-        <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative', width: '100%' }}>
-          {rowVirtualizer.getVirtualItems().map(virtualRow => (
-            <div
-              key={virtualRow.index}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: `${virtualRow.size}px`,
-                transform: `translateY(${virtualRow.start}px)`,
-                padding: `${profile.spacing}px`,
-              }}
-              className="cell-wrapper"
-            >
-              <Cell keyword={data.contenido[virtualRow.index]} columnType={data.tipo} />
-            </div>
-          ))}
-        </div>
+
+      {/* ── Content rows (SCROLLABLE) ── */}
+      <div 
+        style={{ 
+          flex: 1, 
+          overflowY: 'auto', 
+          overflowX: 'hidden', 
+          scrollbarWidth: 'none',
+          paddingBottom: `${sp}px` // Add bottom padding to balance the spacing
+        }}
+      >
+        {data.contenido.map((keyword, i) => (
+          <div
+            key={`${keyword}-${i}`}
+            style={{ height: `${rowHeight}px`, marginTop: `${sp}px`, flexShrink: 0, width: '100%' }}
+          >
+            <Cell keyword={keyword} columnType={data.tipo} />
+          </div>
+        ))}
       </div>
     </div>
   );
