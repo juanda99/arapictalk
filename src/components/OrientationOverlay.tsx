@@ -8,12 +8,12 @@ import { windowSizeAtom } from '../store/atoms/uiState';
 export const OrientationOverlay: React.FC = () => {
   const { width, height } = useAtomValue(windowSizeAtom);
   
-  // Only show overlay if we are in portrait (height > width) 
-  // AND it's likely a mobile device (width < 600 or height < 600)
-  const isPortrait = height > width;
+  // Only show overlay if it's likely a mobile device (width < 600 or height < 600)
+  // AND we are in portrait (height > width)
   const isMobile = width < 600 || height < 600;
-
-  if (!isPortrait || !isMobile) return null;
+  const isPortrait = height > width;
+  
+  if (!isMobile || !isPortrait) return null;
 
   return (
     <Box
@@ -36,10 +36,10 @@ export const OrientationOverlay: React.FC = () => {
     >
       <ScreenRotationIcon sx={{ fontSize: 80, mb: 4, animation: 'rotate 2s infinite ease-in-out' }} />
       <Typography variant="h4" sx={{ fontWeight: 'bold' }} gutterBottom>
-        Por favor, gira tu dispositivo
+        Gira tu dispositivo
       </Typography>
       <Typography variant="h6">
-        Para una mejor experiencia con el tablero de comunicación, usa el modo apaisado (horizontal).
+        Para una mejor experiencia con el tablero, usa el modo apaisado (horizontal).
       </Typography>
 
       <style>

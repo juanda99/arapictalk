@@ -45,6 +45,9 @@ import LanguageIcon from '@mui/icons-material/Language';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import { isFullscreenAtom } from '../store/atoms/uiState';
 import { FONT_LIST } from '../constants/fonts';
 import { FontOption } from './FontOption';
 import languages from '../constants/languages';
@@ -64,6 +67,7 @@ export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useAtom(isSidebarOpenAtom);
   const [profile, setProfile] = useAtom(activeProfileAtom);
   const [themeMode, setThemeMode] = useAtom(themeModeAtom);
+  const [isFullscreen] = useAtom(isFullscreenAtom);
   const [sidebarMode, setSidebarMode] = useState<'settings' | 'library' | 'local' | 'templates'>('settings');
   const [tabIndex, setTabIndex] = useState(0);
   const [expandedSection, setExpandedSection] = useState<string | null>('text');
@@ -95,6 +99,27 @@ export const Sidebar: React.FC = () => {
 
   const handleExportClose = () => {
     setExportAnchorEl(null);
+  };
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const docEl = document.documentElement as any;
+      const requestFullscreen = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+      if (requestFullscreen) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        requestFullscreen.call(docEl).catch((err: any) => {
+          console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+      }
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const doc = document as any;
+      const exitFullscreen = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+      if (exitFullscreen) {
+        exitFullscreen.call(doc);
+      }
+    }
   };
 
   return (
@@ -248,6 +273,21 @@ export const Sidebar: React.FC = () => {
               <BugReportIcon fontSize="small" />
             </IconButton>
           </Tooltip>
+          
+          <Tooltip title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"} placement="right">
+            <span>
+              <IconButton 
+                onClick={toggleFullscreen} 
+                size="small" 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                disabled={!((document.documentElement as any).requestFullscreen || (document.documentElement as any).webkitRequestFullscreen || (document.documentElement as any).mozRequestFullScreen || (document.documentElement as any).msRequestFullscreen)}
+                sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }}
+              >
+                {isFullscreen ? <FullscreenExitIcon fontSize="small" /> : <FullscreenIcon fontSize="small" />}
+              </IconButton>
+            </span>
+          </Tooltip>
+
           <Tooltip title="Idioma" placement="right">
             <IconButton size="small" sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }}>
               <LanguageIcon fontSize="small" />

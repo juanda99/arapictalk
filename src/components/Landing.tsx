@@ -71,6 +71,16 @@ export const Landing: React.FC = () => {
     if (!input.trim()) return;
     
     setIsGenerating(true);
+
+    // Request fullscreen on user gesture
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const docEl = document.documentElement as any;
+    const requestFullscreen = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+    if (requestFullscreen) {
+      requestFullscreen.call(docEl).catch(() => {
+        // Silently fail if blocked
+      });
+    }
     
     // Simulamos la llamada a la IA con un delay
     setTimeout(() => {
