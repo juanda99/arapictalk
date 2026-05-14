@@ -4,7 +4,7 @@ import { Cell } from './Cell';
 import type { ColumnData } from '../core/types';
 import { activeProfileAtom, boardDataAtom, columnIndicesAtom } from '../store/atoms/boardState';
 import IconButton from '@mui/material/IconButton';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import CachedIcon from '@mui/icons-material/Cached';
 import { layoutMetricsAtom } from '../store/selectors/layoutMetrics';
 
 interface Props {
@@ -89,9 +89,19 @@ export const Column: React.FC<Props> = ({ data, slotIndex }) => {
           <IconButton
             size="small"
             onClick={handleCycle}
-            sx={{ p: 0.3, flexShrink: 0, color: 'primary.main', opacity: 0.7, '&:hover': { opacity: 1 } }}
+            sx={{ 
+              p: 0.4, 
+              flexShrink: 0, 
+              bgcolor: 'white', 
+              color: '#8bc34a',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              '&:hover': { bgcolor: '#ffffff', color: '#7cb342', transform: 'scale(1.1)' },
+              width: '26px',
+              height: '26px',
+              transition: 'all 0.2s'
+            }}
           >
-            <SwapHorizIcon sx={{ fontSize: '0.9rem' }} />
+            <CachedIcon sx={{ fontSize: '1.2rem' }} />
           </IconButton>
         )}
       </div>
