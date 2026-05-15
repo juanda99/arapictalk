@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { boardDataAtom, geminiSystemPromptAtom } from '../store/atoms/boardState';
+import { geminiApiKeyAtom, isApiKeyDialogOpenAtom, apiKeyErrorAtom } from '../store/atoms/apiKeys';
 import { generateBoardData } from '../services/geminiApi';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -9,12 +10,14 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
-import { useAtomValue } from 'jotai';
 
 export const Landing: React.FC = () => {
   const { t } = useTranslation();
   const setBoardData = useSetAtom(boardDataAtom);
   const systemPrompt = useAtomValue(geminiSystemPromptAtom);
+  const geminiApiKey = useAtomValue(geminiApiKeyAtom);
+  const setIsApiKeyDialogOpen = useSetAtom(isApiKeyDialogOpenAtom);
+  const setApiKeyError = useSetAtom(apiKeyErrorAtom);
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,11 +40,19 @@ export const Landing: React.FC = () => {
     }
     
     try {
-      const data = await generateBoardData(input, systemPrompt);
+      const data = await generateBoardData(input, systemPrompt, geminiApiKey);
       setBoardData(data);
     } catch (err) {
       console.error('Error generating board:', err);
-      setError(err instanceof Error ? err.message : 'Error desconocido al generar el tablero');
+      
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('API_KEY_MISSING') || msg.includes('API_KEY_LEAKED') || msg.includes('leaked')) {
+        setApiKeyError(msg.includes('LEAKED') || msg.includes('leaked') ? 'API_KEY_LEAKED' : 'API_KEY_MISSING');
+        setIsApiKeyDialogOpen(true);
+        setError(msg.includes('LEAKED') || msg.includes('leaked') ? 'Clave API filtrada o inválida' : 'Falta la clave API de Gemini');
+      } else {
+        setError(err instanceof Error ? err.message : 'Error desconocido al generar el tablero');
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -95,7 +106,17 @@ export const Landing: React.FC = () => {
         />
 
         {error && (
-          <Alert severity="error" sx={{ borderRadius: 2 }}>
+          <Alert 
+            severity="error" 
+            sx={{ borderRadius: 2, textAlign: 'left' }}
+            action={
+              (error.includes('API') || error.includes('clave')) && (
+                <Button color="inherit" size="small" onClick={() => setIsApiKeyDialogOpen(true)}>
+                  CONFIGURAR
+                </Button>
+              )
+            }
+          >
             {error}
           </Alert>
         )}
@@ -117,6 +138,16 @@ export const Landing: React.FC = () => {
         >
           {isGenerating ? t('loading') : t('generateBoard')}
         </Button>
+
+        {!geminiApiKey && (
+          <Button
+            variant="text"
+            onClick={() => setIsApiKeyDialogOpen(true)}
+            sx={{ textTransform: 'none', fontWeight: 600, mt: -1 }}
+          >
+            Configurar API Key de Gemini
+          </Button>
+        )}
       </Box>
       
       <Typography variant="body2" sx={{ mt: 4, opacity: 0.5 }}>

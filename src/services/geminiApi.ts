@@ -1,11 +1,6 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import type { BoardData } from "../core/types";
 
-// NOTE: In a real app, this should come from an environment variable
-// VITE_GEMINI_API_KEY=your_key_here
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
-
-const genAI = new GoogleGenerativeAI(API_KEY);
 
 const schema = {
   description: "Board data for AAC communication",
@@ -47,23 +42,39 @@ const schema = {
   required: ["actividad", "formato", "columnas"],
 };
 
-const model = genAI.getGenerativeModel({
-  model: "gemini-3.1-flash-lite",
-  generationConfig: {
-    responseMimeType: "application/json",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    responseSchema: schema as any,
-    temperature: 0.1,
-  },
-});
+const getModel = (apiKey: string) => {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return genAI.getGenerativeModel({
+    model: "gemini-3.1-flash-lite",
+    generationConfig: {
+      responseMimeType: "application/json",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      responseSchema: schema as any,
+      temperature: 0.1,
+    },
+  });
+};
 
-export const generateBoardData = async (prompt: string, systemPrompt: string): Promise<BoardData> => {
-  if (!API_KEY) {
-    throw new Error("Gemini API Key not found. Please set VITE_GEMINI_API_KEY in your .env file.");
+export const generateBoardData = async (prompt: string, systemPrompt: string, apiKey: string): Promise<BoardData> => {
+  if (!apiKey) {
+    throw new Error("API_KEY_MISSING");
   }
 
-  const result = await model.generateContent(`${systemPrompt}\n\nActividad: ${prompt}`);
-  const response = await result.response;
-  const text = response.text();
-  return JSON.parse(text) as BoardData;
+  try {
+    const model = getModel(apiKey);
+    const result = await model.generateContent(`${systemPrompt}\n\nActividad: ${prompt}`);
+    const response = await result.response;
+    const text = response.text();
+    return JSON.parse(text) as BoardData;
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    
+    // Check for the specific "leaked" error or 403
+    const errorMessage = error instanceof Error ? error.message : "";
+    if (errorMessage.includes("403") || errorMessage.includes("API key was reported as leaked")) {
+      throw new Error("API_KEY_LEAKED", { cause: error });
+    }
+    
+    throw error;
+  }
 };

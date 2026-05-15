@@ -10,6 +10,7 @@ import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { FontLoader } from './components/FontLoader';
 import { OrientationOverlay } from './components/OrientationOverlay';
+import { ApiKeyDialog } from './components/ApiKeyDialog';
 import Box from '@mui/material/Box';
 
 function App() {
@@ -140,6 +141,7 @@ function App() {
           </Box>
         </Box>
       )}
+      <ApiKeyDialog />
     </>
   );
 }
