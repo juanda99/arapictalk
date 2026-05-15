@@ -13,7 +13,7 @@ interface Props {
   colWidth: number;
 }
 
-export const Column: React.FC<Props> = ({ data, slotIndex }) => {
+export const Column: React.FC<Props> = ({ data, slotIndex, colWidth }) => {
   const profile = useAtomValue(activeProfileAtom);
   const boardData = useAtomValue(boardDataAtom);
   const [indices, setIndices] = useAtom(columnIndicesAtom);
@@ -32,17 +32,16 @@ export const Column: React.FC<Props> = ({ data, slotIndex }) => {
   };
 
   const sp = profile.spacing;
+
   const canCycle = !!(boardData && boardData.columnas.length > profile.visibleColsCount);
 
   return (
     <div
       style={{
-        width: `${100 / profile.visibleColsCount}%`,
+        width: `${colWidth}px`,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        paddingLeft: `${sp / 2}px`,
-        paddingRight: `${sp / 2}px`,
         boxSizing: 'border-box',
         overflow: 'hidden',
       }}
@@ -108,20 +107,27 @@ export const Column: React.FC<Props> = ({ data, slotIndex }) => {
         </div>
       )}
 
-      {/* ── Content rows (SCROLLABLE) ── */}
       <div 
         style={{ 
           flex: 1, 
           overflowY: 'auto', 
           overflowX: 'hidden', 
           scrollbarWidth: 'none',
-          paddingBottom: `${sp}px` // Add bottom padding to balance the spacing
+          marginTop: `${sp}px`,
+          paddingBottom: `${sp}px`,
+          scrollSnapType: 'y mandatory'
         }}
       >
         {data.contenido.map((keyword, i) => (
           <div
             key={`${keyword}-${i}`}
-            style={{ height: `${rowHeight}px`, marginTop: `${sp}px`, flexShrink: 0, width: '100%' }}
+            style={{ 
+              height: `${rowHeight}px`, 
+              marginBottom: `${sp}px`, 
+              flexShrink: 0, 
+              width: '100%', 
+              scrollSnapAlign: 'start' 
+            }}
           >
             <Cell keyword={keyword} columnType={data.tipo} />
           </div>

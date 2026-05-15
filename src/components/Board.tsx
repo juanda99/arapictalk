@@ -8,7 +8,7 @@ import { layoutMetricsAtom } from '../store/selectors/layoutMetrics';
 export const Board: React.FC = () => {
   const columns = useAtomValue(visibleColumnsAtom);
   const boardData = useAtomValue(boardDataAtom);
-  const { visibleColsCount } = useAtomValue(activeProfileAtom);
+  const { visibleColsCount, spacing } = useAtomValue(activeProfileAtom);
   const [indices, setIndices] = useAtom(columnIndicesAtom);
   const { colWidth } = useAtomValue(layoutMetricsAtom);
 
@@ -33,7 +33,8 @@ export const Board: React.FC = () => {
           display: 'flex',
           width: '100%',
           height: '100%',
-          transition: 'width 0.2s ease-in-out'
+          transition: 'width 0.2s ease-in-out',
+          gap: `${spacing}px`
         }}
       >
         {columns.map((col, idx) => (

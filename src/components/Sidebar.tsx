@@ -62,6 +62,9 @@ const FITZGERALD_COLORS = [
   { name: 'Tiempo', color: '#D7CCC8' },
 ];
 
+const GREEN_PALETTE = ['#f1f8e9', '#dcedc8', '#c5e1a5', '#aed581', '#9ccc65', '#8bc34a', '#7cb342'];
+const NEUTRAL_PALETTE = ['#FFFFFF', '#F5F5F5', '#EEEEEE', '#E0E0E0', '#BDBDBD', '#9E9E9E', '#757575'];
+
 
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useAtom(isSidebarOpenAtom);
@@ -264,7 +267,19 @@ export const Sidebar: React.FC = () => {
             </IconButton>
           </Tooltip>
           <Tooltip title={themeMode === 'light' ? "Modo oscuro" : "Modo claro"} placement="right">
-            <IconButton onClick={() => setThemeMode((prev: 'light' | 'dark') => prev === 'light' ? 'dark' : 'light')} size="small" sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }}>
+            <IconButton 
+              onClick={() => {
+                const newMode = themeMode === 'light' ? 'dark' : 'light';
+                setThemeMode(newMode);
+                setProfile(prev => ({
+                  ...prev,
+                  boardBackgroundColor: newMode === 'dark' ? '#1a1c1e' : '#FFFFFF',
+                  sentenceBarColor: newMode === 'dark' ? '#7cb342' : '#9ccc65'
+                }));
+              }} 
+              size="small" 
+              sx={{ color: themeMode === 'dark' ? '#fff' : 'inherit' }}
+            >
               {themeMode === 'light' ? <DarkModeIcon fontSize="small" /> : <LightModeIcon fontSize="small" />}
             </IconButton>
           </Tooltip>
@@ -367,11 +382,12 @@ export const Sidebar: React.FC = () => {
               color: themeMode === 'dark' ? '#fff' : 'inherit'
             }}>
               <Box>
-                <Typography gutterBottom variant="body2" sx={{ fontWeight: 500 }}>
+                <Typography gutterBottom variant="body2" sx={{ fontWeight: 500, color: profile.isSquare ? 'text.disabled' : 'inherit' }}>
                   Filas <strong>{profile.visibleRowsCount}</strong>
                 </Typography>
                 <Slider
                   size="small"
+                  disabled={profile.isSquare}
                   value={profile.visibleRowsCount}
                   onChange={(_, val) => updateProfile('visibleRowsCount', val)}
                   step={1}
@@ -379,6 +395,11 @@ export const Sidebar: React.FC = () => {
                   min={1}
                   max={15}
                 />
+                {profile.isSquare && (
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: -1, fontStyle: 'italic', mb: 1 }}>
+                    Calculado automáticamente (Celdas cuadradas)
+                  </Typography>
+                )}
               </Box>
 
               <Box>
@@ -451,6 +472,74 @@ export const Sidebar: React.FC = () => {
                   }
                   label={<Typography variant="body2" sx={{ fontWeight: 500 }}>Mostrar cabeceras</Typography>}
                 />
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                  Fondo de la frase
+                </Typography>
+                <Box sx={{ display: 'flex', gap: '4px', flexWrap: 'wrap', mb: 1.5 }}>
+                  {GREEN_PALETTE.map((c) => (
+                    <Box
+                      key={`sentence-palette-${c}`}
+                      onClick={() => updateProfile('sentenceBarColor', c)}
+                      sx={{ 
+                        width: '24px', height: '24px', backgroundColor: c, 
+                        border: '1px solid', borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.3)' : '#ccc', 
+                        borderRadius: '4px', cursor: 'pointer',
+                        transform: profile.sentenceBarColor === c ? 'scale(1.2)' : 'none',
+                        boxShadow: profile.sentenceBarColor === c ? 2 : 0,
+                        transition: 'all 0.1s'
+                      }}
+                    />
+                  ))}
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <input
+                    type="color"
+                    value={profile.sentenceBarColor || '#f1f8e9'}
+                    onChange={(e) => updateProfile('sentenceBarColor', e.target.value)}
+                    style={{ width: '32px', height: '32px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}
+                  />
+                  <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+                    {(profile.sentenceBarColor || '#f1f8e9').toUpperCase()}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                  Fondo del tablero
+                </Typography>
+                <Box sx={{ display: 'flex', gap: '4px', flexWrap: 'wrap', mb: 1.5 }}>
+                  {NEUTRAL_PALETTE.map((c) => (
+                    <Box
+                      key={`board-palette-${c}`}
+                      onClick={() => updateProfile('boardBackgroundColor', c)}
+                      sx={{ 
+                        width: '24px', height: '24px', backgroundColor: c, 
+                        border: '1px solid', borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.3)' : '#ccc', 
+                        borderRadius: '4px', cursor: 'pointer',
+                        transform: profile.boardBackgroundColor === c ? 'scale(1.2)' : 'none',
+                        boxShadow: profile.boardBackgroundColor === c ? 2 : 0,
+                        transition: 'all 0.1s'
+                      }}
+                    />
+                  ))}
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <input
+                    type="color"
+                    value={profile.boardBackgroundColor || '#FFFFFF'}
+                    onChange={(e) => updateProfile('boardBackgroundColor', e.target.value)}
+                    style={{ width: '32px', height: '32px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}
+                  />
+                  <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+                    {(profile.boardBackgroundColor || '#FFFFFF').toUpperCase()}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
 

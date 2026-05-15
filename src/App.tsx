@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { boardDataAtom } from './store/atoms/boardState';
+import { boardDataAtom, activeProfileAtom } from './store/atoms/boardState';
 import { windowSizeAtom, boardAreaHeightAtom, themeModeAtom, isFullscreenAtom } from './store/atoms/uiState';
 import { Landing } from './components/Landing';
 import { Board } from './components/Board';
@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 
 function App() {
   const boardData = useAtomValue(boardDataAtom);
+  const profile = useAtomValue(activeProfileAtom);
   const themeMode = useAtomValue(themeModeAtom);
   const setWindowSize = useSetAtom(windowSizeAtom);
   const setBoardAreaHeight = useSetAtom(boardAreaHeightAtom);
@@ -102,7 +103,7 @@ function App() {
           </Box>
         </Box>
       ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'row', height: '100dvh', width: '100vw', bgcolor: themeMode === 'dark' ? '#1a1c1e' : 'background.default', overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', height: '100dvh', width: '100vw', bgcolor: profile.boardBackgroundColor || (themeMode === 'dark' ? '#1a1c1e' : '#FFFFFF'), overflow: 'hidden' }}>
           <OrientationOverlay />
           {!isFullscreen && <Sidebar />}
           {/* Right panel: its height is the source of truth for layout calculations */}

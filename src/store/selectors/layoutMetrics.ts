@@ -18,8 +18,9 @@ export const layoutMetricsAtom = atom((get) => {
   const panelWidth = isSidebarOpen ? (width >= 1200 ? 352 : 300) : 0;
   const sidebarWidth = isFullscreen ? 0 : (72 + panelWidth);
   const availableWidth = Math.max(0, width - sidebarWidth);
-
-  const colWidth = availableWidth / profile.visibleColsCount;
+  const sp = profile.spacing;
+  const nCols = profile.visibleColsCount;
+  const colWidth = (availableWidth - (nCols - 1) * sp) / nCols;
 
   // VERTICAL LAYOUT:
   //   [sp] SentenceBar [sp] HeaderBar [sp] Row1 [sp] Row2 ... [sp] RowN
@@ -36,7 +37,6 @@ export const layoutMetricsAtom = atom((get) => {
   //   (N+1)*rowHeight = totalHeight - EXTRA - HEADER_BAR_HEIGHT - (N+2)*sp
 
   const N = profile.visibleRowsCount;
-  const sp = profile.spacing;
   const currentHeaderHeight = profile.showColumnHeaders ? HEADER_BAR_HEIGHT : 0;
   const gapsCount = profile.showColumnHeaders ? (N + 2) : (N + 1);
 

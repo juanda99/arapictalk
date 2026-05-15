@@ -20,6 +20,8 @@ export const activeProfileAtom = atom<UserProfile>({
   isSquare: false,
   spacing: 3,
   showColumnHeaders: true,
+  sentenceBarColor: '#9ccc65',
+  boardBackgroundColor: '#FFFFFF',
   showText: false,
   fontFamily: 'Open Sans',
   fontSize: 18,
