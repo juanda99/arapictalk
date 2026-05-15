@@ -18,6 +18,7 @@ function App() {
   const setBoardAreaHeight = useSetAtom(boardAreaHeightAtom);
   const rightPanelRef = useRef<HTMLDivElement>(null);
 
+  const isFullscreen = useAtomValue(isFullscreenAtom);
   const setIsFullscreen = useSetAtom(isFullscreenAtom);
 
   // Track window size for colWidth calculation
@@ -103,7 +104,7 @@ function App() {
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'row', height: '100dvh', width: '100vw', bgcolor: themeMode === 'dark' ? '#1a1c1e' : 'background.default', overflow: 'hidden' }}>
           <OrientationOverlay />
-          <Sidebar />
+          {!isFullscreen && <Sidebar />}
           {/* Right panel: its height is the source of truth for layout calculations */}
           <Box
             ref={observeRightPanel}

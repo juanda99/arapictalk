@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { activeProfileAtom } from '../atoms/boardState';
-import { isSidebarOpenAtom, windowSizeAtom, boardAreaHeightAtom } from '../atoms/uiState';
+import { isSidebarOpenAtom, windowSizeAtom, boardAreaHeightAtom, isFullscreenAtom } from '../atoms/uiState';
 
 // Compact separator bar height for column headers (fits 2 lines of text + button)
 export const HEADER_BAR_HEIGHT = 40;
@@ -14,8 +14,9 @@ export const layoutMetricsAtom = atom((get) => {
   const totalHeight = get(boardAreaHeightAtom);
 
   // Sidebar width
+  const isFullscreen = get(isFullscreenAtom);
   const panelWidth = isSidebarOpen ? (width >= 1200 ? 352 : 300) : 0;
-  const sidebarWidth = 72 + panelWidth;
+  const sidebarWidth = isFullscreen ? 0 : (72 + panelWidth);
   const availableWidth = Math.max(0, width - sidebarWidth);
 
   const colWidth = availableWidth / profile.visibleColsCount;
@@ -36,15 +37,17 @@ export const layoutMetricsAtom = atom((get) => {
 
   const N = profile.visibleRowsCount;
   const sp = profile.spacing;
+  const currentHeaderHeight = profile.showColumnHeaders ? HEADER_BAR_HEIGHT : 0;
+  const gapsCount = profile.showColumnHeaders ? (N + 2) : (N + 1);
 
   const rowHeight = profile.isSquare
     ? colWidth
-    : (totalHeight - EXTRA_SENTENCE_BAR_HEIGHT - HEADER_BAR_HEIGHT - (N + 2) * sp) / (N + 1);
+    : (totalHeight - EXTRA_SENTENCE_BAR_HEIGHT - currentHeaderHeight - gapsCount * sp) / (N + 1);
 
   return {
     colWidth,
     rowHeight: Math.max(20, rowHeight),
-    headerBarHeight: HEADER_BAR_HEIGHT,
+    headerBarHeight: currentHeaderHeight,
     extraSentenceBarHeight: EXTRA_SENTENCE_BAR_HEIGHT,
     availableWidth,
   };
