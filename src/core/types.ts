@@ -18,6 +18,7 @@ export interface UserProfile {
   visibleRowsCount: number;
   isSquare: boolean;
   spacing: number;
+  showColumnHeaders?: boolean;
   // Global - Texto
   showText: boolean;
   fontFamily: string;

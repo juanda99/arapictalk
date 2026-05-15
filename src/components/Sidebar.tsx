@@ -438,6 +438,20 @@ export const Sidebar: React.FC = () => {
                   max={10}
                 />
               </Box>
+
+              <Box sx={{ mt: -1 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={!!profile.showColumnHeaders}
+                      onChange={(e) => updateProfile('showColumnHeaders', e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label={<Typography variant="body2" sx={{ fontWeight: 500 }}>Mostrar cabeceras</Typography>}
+                />
+              </Box>
             </Box>
 
             {/* Global Tab Content */}
