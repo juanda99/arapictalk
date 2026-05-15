@@ -8,6 +8,7 @@ export interface SentenceElement {
 export interface ColumnData {
   tipo: string;
   contenido: string[];
+  esDinamica: boolean;
 }
 
 export interface UserProfile {

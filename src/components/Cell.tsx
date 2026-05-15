@@ -132,15 +132,25 @@ export const Cell: React.FC<CellProps> = React.memo(({ keyword, columnType }) =>
               style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
             />
           ) : (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '4px' }}>
+            <div style={{ 
+              flex: 1, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              textAlign: 'center', 
+              padding: '8px',
+              background: profile.fitzgeraldEnabled ? 'transparent' : 'rgba(0,0,0,0.03)',
+              height: '100%'
+            }}>
               <span style={{ 
-                fontSize: `calc(${profile.fontSize}px * 1.5)`, 
-                fontWeight: 'bold', 
-                color: '#FFFFFF',
+                fontSize: `calc(${profile.fontSize}px * 1.3)`, 
+                fontWeight: '800', 
+                color: profile.fontColor,
                 fontFamily: profile.fontFamily,
                 textTransform: profile.capitalLetters ? 'uppercase' : 'none',
                 lineHeight: 1.1,
-                wordBreak: 'break-word'
+                wordBreak: 'break-word',
+                opacity: 0.9
               }}>
                 {keyword}
               </span>

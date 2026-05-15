@@ -39,7 +39,7 @@ export const Board: React.FC = () => {
       >
         {columns.map((col, idx) => (
           <Column
-            key={`${col.tipo}-${idx}`}
+            key={col ? `${col.tipo}-${idx}` : `empty-slot-${idx}`}
             data={col}
             slotIndex={idx}
             colWidth={colWidth}

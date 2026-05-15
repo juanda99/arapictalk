@@ -76,13 +76,22 @@ export const SentenceBar: React.FC = () => {
             return (
               <div 
                 key={el.id} 
-                style={{
-                  ...itemStyle,
-                  backgroundColor: !currentId ? '#d32f2f' : 'transparent',
-                }}
+                style={itemStyle}
                 onClick={() => cycleVariation(el.id)}
               >
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden' }}>
+                <div 
+                  style={{ 
+                    flex: 1, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    width: '100%', 
+                    overflow: 'hidden',
+                    backgroundColor: !currentId ? 'rgba(255,255,255,0.2)' : 'transparent',
+                    borderRadius: `${profile.borderRadius / 2}px`,
+                    height: '100%'
+                  }}
+                >
                   {currentId ? (
                     <img 
                       src={getPictogramImageUrl(currentId, 300)} 
@@ -93,12 +102,14 @@ export const SentenceBar: React.FC = () => {
                     />
                   ) : (
                     <span style={{ 
-                      fontSize: '0.9rem', 
+                      fontSize: `calc(${profile.fontSize}px * 0.7)`, 
                       fontWeight: 'bold', 
-                      color: '#FFFFFF',
+                      color: themeMode === 'dark' ? '#fff' : '#1b5e20',
                       textAlign: 'center',
-                      lineHeight: 1,
-                      padding: '2px'
+                      lineHeight: 1.1,
+                      padding: '4px',
+                      fontFamily: profile.fontFamily,
+                      textTransform: profile.capitalLetters ? 'uppercase' : 'none',
                     }}>
                       {el.text}
                     </span>

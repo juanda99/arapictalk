@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 import { boardDataAtom, hiddenColumnsAtom, activeProfileAtom, columnIndicesAtom } from '../atoms/boardState';
 import type { ColumnData } from '../../core/types';
 
-export const visibleColumnsAtom = atom<ColumnData[]>((get) => {
+export const visibleColumnsAtom = atom<(ColumnData | null)[]>((get) => {
   const boardData = get(boardDataAtom);
   const hidden = get(hiddenColumnsAtom);
   const columnIndices = get(columnIndicesAtom);
@@ -21,8 +21,11 @@ export const visibleColumnsAtom = atom<ColumnData[]>((get) => {
   }
 
   // 2. Mapear los índices a los objetos de columna
+  // Si el índice es mayor que las disponibles, devolvemos null para indicar "slot vacío"
   return columnIndices.map(idx => {
-    const realIndex = idx % availableColumns.length;
-    return availableColumns[realIndex];
+    if (idx < availableColumns.length) {
+      return availableColumns[idx];
+    }
+    return null;
   });
 });

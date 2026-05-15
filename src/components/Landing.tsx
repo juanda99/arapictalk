@@ -1,76 +1,30 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
-import { boardDataAtom } from '../store/atoms/boardState';
-import type { BoardData } from '../core/types';
-
-// Mock del JSON que nos devolvería la "IA"
-const mockSupermarketData: BoardData = {
-  actividad: "Ir al supermercado",
-  formato: "Estructura de Columnas Expandida",
-  columnas: [
-    {
-      tipo: "Personas",
-      contenido: ["Yo", "Tú", "Mamá", "Papá", "Cajero", "Cajera", "Guardia", "Reponedor", "Reponedora", "Cliente", "Abuelo", "Abuela", "Dependiente", "Dependienta"]
-    },
-    {
-      tipo: "Lugares",
-      contenido: ["Pasillo", "Caja", "Entrada", "Salida", "Parking", "Frutería", "Carnicería", "Panadería", "Pescadería", "Charcutería", "Neveras", "Congelados", "Baño", "Mostrador", "Ascensor"]
-    },
-    {
-      tipo: "Acciones",
-      contenido: ["Ir", "Mirar", "Buscar", "Encontrar", "Comprar", "Pagar", "Poner", "Sacar", "Ayudar", "Esperar", "Empujar", "Pesar", "Escanear", "Abrir", "Cerrar", "Coger", "Dejar", "Elegir", "Pedir", "Guardar", "Caminar", "Hacer cola", "Llevar", "Traer"]
-    },
-    {
-      tipo: "Palabras Núcleo",
-      contenido: ["Quiero", "Necesito", "Dame", "Toma", "Sí", "No", "Más", "Terminado", "Ver", "Hay", "No hay", "Otro", "Este", "Ese", "Igual", "Diferente"]
-    },
-    {
-      tipo: "Alimentos (Sólidos)",
-      contenido: ["Pan", "Carne", "Pollo", "Pescado", "Fruta", "Verdura", "Huevos", "Queso", "Yogurt", "Pasta", "Arroz", "Legumbres", "Galletas", "Cereales", "Chocolate", "Jamón", "Pizza", "Patatas", "Helado", "Embutido", "Harina", "Azúcar", "Sal"]
-    },
-    {
-      tipo: "Bebidas",
-      contenido: ["Agua", "Leche", "Jugo", "Zumo", "Refresco", "Batido", "Café", "Té", "Cerveza", "Vino", "Agua con gas"]
-    },
-    {
-      tipo: "Hogar y Limpieza",
-      contenido: ["Jabón", "Detergente", "Suavizante", "Lavavajillas", "Papel higiénico", "Papel de cocina", "Bayeta", "Esponja", "Bolsa", "Basura", "Escoba", "Cubo", "Limpiacristales", "Insecticida"]
-    },
-    {
-      tipo: "Cuidado Personal",
-      contenido: ["Champú", "Gel", "Desodorante", "Pasta de dientes", "Cepillo", "Peine", "Cuchilla", "Compresa", "Pañales", "Toallitas", "Crema", "Colonia"]
-    },
-    {
-      tipo: "Objetos y Tecnología",
-      contenido: ["Carrito", "Cesta", "Ticket", "Lista", "Báscula", "Escáner", "Pantalla", "Nevera", "Estante", "Monedero", "Bolsa de tela", "Bolsa de plástico"]
-    },
-    {
-      tipo: "Dinero y Pago",
-      contenido: ["Dinero", "Monedas", "Billete", "Tarjeta", "Pagar", "Cambio", "Precio", "Caro", "Barato", "Oferta", "Descuento", "Gratis", "Pagar con móvil"]
-    },
-    {
-      tipo: "Atributos y Tiempo",
-      contenido: ["Grande", "Pequeño", "Frío", "Caliente", "Rico", "Feo", "Sucio", "Limpio", "Lleno", "Vacío", "Mucho", "Poco", "Nada", "Todo", "Primero", "Después", "Ahora", "Luego", "Rápido", "Despacio"]
-    },
-    {
-      tipo: "Sensaciones y Regulación",
-      contenido: ["Feliz", "Cansado", "Enojado", "Asustado", "Tranquilo", "Mal", "Bien", "Mucho ruido", "Mucha luz", "Mucha gente", "Tocar", "Oler", "Hambre", "Sed", "Quiero irme", "Necesito un descanso", "Espacio"]
-    }
-  ]
-};
+import { boardDataAtom, geminiSystemPromptAtom } from '../store/atoms/boardState';
+import { generateBoardData } from '../services/geminiApi';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import { useAtomValue } from 'jotai';
 
 export const Landing: React.FC = () => {
   const { t } = useTranslation();
   const setBoardData = useSetAtom(boardDataAtom);
+  const systemPrompt = useAtomValue(geminiSystemPromptAtom);
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
     
     setIsGenerating(true);
+    setError(null);
 
     // Request fullscreen on user gesture
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,32 +36,93 @@ export const Landing: React.FC = () => {
       });
     }
     
-    // Simulamos la llamada a la IA con un delay
-    setTimeout(() => {
-      setBoardData(mockSupermarketData);
-    }, 1500);
+    try {
+      const data = await generateBoardData(input, systemPrompt);
+      setBoardData(data);
+    } catch (err) {
+      console.error('Error generating board:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido al generar el tablero');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '2rem' }}>
-      <h1>{t('appTitle')}</h1>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', maxWidth: '500px' }}>
-        <input 
-          type="text" 
+    <Box 
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '100%', 
+        padding: '2rem',
+        textAlign: 'center',
+        bgcolor: 'background.default'
+      }}
+    >
+      <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 800, color: 'primary.main', mb: 4 }}>
+        {t('appTitle')}
+      </Typography>
+
+      <Box 
+        component="form" 
+        onSubmit={handleSubmit} 
+        sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '1.5rem', 
+          width: '100%', 
+          maxWidth: '600px',
+          p: 4,
+          borderRadius: 4,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          bgcolor: 'background.paper'
+        }}
+      >
+        <Typography variant="h6" sx={{ mb: 1, opacity: 0.8 }}>
+          ¿Sobre qué quieres hablar hoy?
+        </Typography>
+
+        <TextField
+          fullWidth
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={t('dynamicInputPlaceholder')}
-          style={{ padding: '1rem', fontSize: '1.2rem', borderRadius: '8px', border: '2px solid #ccc' }}
           disabled={isGenerating}
+          variant="outlined"
+          autoFocus
+          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
         />
-        <button 
+
+        {error && (
+          <Alert severity="error" sx={{ borderRadius: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <Button 
           type="submit" 
+          variant="contained" 
+          size="large"
           disabled={isGenerating || !input.trim()}
-          style={{ padding: '1rem', fontSize: '1.2rem', borderRadius: '8px', border: 'none', backgroundColor: '#4caf50', color: 'white', cursor: 'pointer' }}
+          startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : null}
+          sx={{ 
+            py: 1.5, 
+            fontSize: '1.1rem', 
+            borderRadius: 3,
+            textTransform: 'none',
+            fontWeight: 700,
+            boxShadow: '0 4px 14px rgba(76, 175, 80, 0.3)'
+          }}
         >
           {isGenerating ? t('loading') : t('generateBoard')}
-        </button>
-      </form>
-    </div>
+        </Button>
+      </Box>
+      
+      <Typography variant="body2" sx={{ mt: 4, opacity: 0.5 }}>
+        Impulsado por Gemini AI y ARASAAC
+      </Typography>
+    </Box>
   );
 };
+
