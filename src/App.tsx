@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { boardDataAtom, activeProfileAtom } from './store/atoms/boardState';
 import { windowSizeAtom, boardAreaHeightAtom, themeModeAtom, isFullscreenAtom } from './store/atoms/uiState';
+import { layoutMetricsAtom } from './store/selectors/layoutMetrics';
 import { Landing } from './components/Landing';
 import { Board } from './components/Board';
 import { SentenceBar } from './components/SentenceBar';
@@ -48,6 +49,27 @@ function App() {
       document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
   }, [setWindowSize, setIsFullscreen]);
+
+  // Auto-calculate rows in Square Mode
+  const layoutMetrics = useAtomValue(layoutMetricsAtom);
+  const boardAreaHeight = useAtomValue(boardAreaHeightAtom);
+  const setProfile = useSetAtom(activeProfileAtom);
+
+  useEffect(() => {
+    const { colWidth, extraSentenceBarHeight, headerBarHeight } = layoutMetrics;
+    if (profile.isSquare && boardAreaHeight > 0 && colWidth > 0) {
+      const sp = profile.spacing;
+      // Formula: boardAreaHeight = (N+1)*colWidth + EXTRA + currentHeaderHeight + (N+3)*sp
+      // N * (colWidth + sp) = boardAreaHeight - EXTRA - currentHeaderHeight - 3*sp - colWidth
+      const availableForN = boardAreaHeight - extraSentenceBarHeight - headerBarHeight - (3 * sp) - colWidth;
+      const calculatedN = Math.floor(availableForN / (colWidth + sp));
+      const finalN = Math.max(1, calculatedN);
+      
+      if (finalN !== profile.visibleRowsCount) {
+        setProfile(prev => ({ ...prev, visibleRowsCount: finalN }));
+      }
+    }
+  }, [profile.isSquare, boardAreaHeight, layoutMetrics, profile.spacing, profile.visibleRowsCount, setProfile]);
 
   // Auto-fullscreen attempt on mobile
   useEffect(() => {

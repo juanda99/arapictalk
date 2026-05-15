@@ -8,7 +8,7 @@ import CachedIcon from '@mui/icons-material/Cached';
 import { layoutMetricsAtom } from '../store/selectors/layoutMetrics';
 
 interface Props {
-  data: ColumnData;
+  data: ColumnData | null;
   slotIndex: number;
   colWidth: number;
 }
@@ -33,7 +33,28 @@ export const Column: React.FC<Props> = ({ data, slotIndex, colWidth }) => {
 
   const sp = profile.spacing;
 
-  const canCycle = !!(boardData && boardData.columnas.length > profile.visibleColsCount);
+  // Placeholder for empty column
+  if (!data) {
+    return (
+      <div
+        style={{
+          width: `${colWidth}px`,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          boxSizing: 'border-box',
+          overflow: 'hidden',
+          opacity: 0.15,
+          background: 'repeating-linear-gradient(45deg, #ccc, #ccc 10px, #eee 10px, #eee 20px)',
+          borderRadius: `${profile.borderRadius}px`,
+          border: '1px dashed #999',
+          marginTop: profile.showColumnHeaders ? `${headerBarHeight + sp}px` : 0,
+        }}
+      />
+    );
+  }
+
+  const canCycle = !!(data && data.esDinamica && boardData && boardData.columnas.length > profile.visibleColsCount);
 
   return (
     <div
@@ -110,12 +131,16 @@ export const Column: React.FC<Props> = ({ data, slotIndex, colWidth }) => {
       <div 
         style={{ 
           flex: 1, 
+          display: 'flex',
+          flexDirection: 'column',
+          gap: `${sp}px`,
           overflowY: 'auto', 
           overflowX: 'hidden', 
           scrollbarWidth: 'none',
           marginTop: `${sp}px`,
           paddingBottom: `${sp}px`,
-          scrollSnapType: 'y mandatory'
+          scrollSnapType: 'y mandatory',
+          scrollPaddingTop: `${sp}px`
         }}
       >
         {data.contenido.map((keyword, i) => (
@@ -123,7 +148,6 @@ export const Column: React.FC<Props> = ({ data, slotIndex, colWidth }) => {
             key={`${keyword}-${i}`}
             style={{ 
               height: `${rowHeight}px`, 
-              marginBottom: `${sp}px`, 
               flexShrink: 0, 
               width: '100%', 
               scrollSnapAlign: 'start' 

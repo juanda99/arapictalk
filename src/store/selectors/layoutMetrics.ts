@@ -38,7 +38,15 @@ export const layoutMetricsAtom = atom((get) => {
 
   const N = profile.visibleRowsCount;
   const currentHeaderHeight = profile.showColumnHeaders ? HEADER_BAR_HEIGHT : 0;
-  const gapsCount = profile.showColumnHeaders ? (N + 2) : (N + 1);
+  
+  // Revised vertical spacing logic (sp = spacing):
+  // 1. Gap above SentenceBar (sp)
+  // 2. Gap between SentenceBar and HeaderBar (sp)
+  // 3. Gap between HeaderBar and first row (sp)
+  // 4. Gaps after each of N rows (N * sp)
+  // Total gapsCount = 1 + 1 + 1 + N = N + 3 (if header shown)
+  // If no header, gapsCount = N + 2.
+  const gapsCount = profile.showColumnHeaders ? (N + 3) : (N + 2);
 
   const rowHeight = profile.isSquare
     ? colWidth

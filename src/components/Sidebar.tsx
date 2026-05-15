@@ -1,21 +1,29 @@
 import React, { useState } from 'react';
-import { useAtom } from 'jotai';
 import { isSidebarOpenAtom, themeModeAtom } from '../store/atoms/uiState';
-import { activeProfileAtom } from '../store/atoms/boardState';
+import { activeProfileAtom, geminiSystemPromptAtom, DEFAULT_GEMINI_PROMPT, boardDataAtom } from '../store/atoms/boardState';
+import { generateBoardData } from '../services/geminiApi';
+import { useAtom, useSetAtom } from 'jotai';
+import MDEditor from '@uiw/react-md-editor';
+// Import MDEditor styles
+import '@uiw/react-md-editor/markdown-editor.css';
+import '@uiw/react-markdown-preview/markdown.css';
 import type { UserProfile } from '../core/types';
 
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
 import Switch from '@mui/material/Switch';
 import Slider from '@mui/material/Slider';
+import CircularProgress from '@mui/material/CircularProgress';
 import TuneIcon from '@mui/icons-material/Tune';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import CloseIcon from '@mui/icons-material/Close';
 import Tooltip from '@mui/material/Tooltip';
 import Tabs from '@mui/material/Tabs';
@@ -28,6 +36,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
 import FormatAlignTopIcon from '@mui/icons-material/VerticalAlignTop';
 import FormatAlignCenterIcon from '@mui/icons-material/VerticalAlignCenter';
 import FormatAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
@@ -45,6 +54,8 @@ import LanguageIcon from '@mui/icons-material/Language';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { isFullscreenAtom } from '../store/atoms/uiState';
@@ -69,11 +80,19 @@ const NEUTRAL_PALETTE = ['#FFFFFF', '#F5F5F5', '#EEEEEE', '#E0E0E0', '#BDBDBD', 
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useAtom(isSidebarOpenAtom);
   const [profile, setProfile] = useAtom(activeProfileAtom);
-  const [themeMode, setThemeMode] = useAtom(themeModeAtom);
+   const [themeMode, setThemeMode] = useAtom(themeModeAtom);
   const [isFullscreen] = useAtom(isFullscreenAtom);
-  const [sidebarMode, setSidebarMode] = useState<'settings' | 'library' | 'local' | 'templates'>('settings');
+  const [geminiSystemPrompt, setGeminiSystemPrompt] = useAtom(geminiSystemPromptAtom);
+  const setBoardData = useSetAtom(boardDataAtom);
+  const [sidebarMode, setSidebarMode] = useState<'settings' | 'library' | 'local' | 'templates' | 'search'>('search');
   const [tabIndex, setTabIndex] = useState(0);
+  const [searchTabIndex, setSearchTabIndex] = useState(0);
   const [expandedSection, setExpandedSection] = useState<string | null>('text');
+  const [isFullscreenPromptOpen, setIsFullscreenPromptOpen] = useState(false);
+  const [draftPrompt, setDraftPrompt] = useState(geminiSystemPrompt);
+  const [searchInput, setSearchInput] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   // Export Menu State
   const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(null);
@@ -83,7 +102,7 @@ export const Sidebar: React.FC = () => {
     setProfile((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleNavClick = (mode: 'settings' | 'library' | 'local' | 'templates') => {
+  const handleNavClick = (mode: 'settings' | 'library' | 'local' | 'templates' | 'search') => {
     if (sidebarMode === mode && isOpen) {
       setIsOpen(false);
     } else {
@@ -102,6 +121,26 @@ export const Sidebar: React.FC = () => {
 
   const handleExportClose = () => {
     setExportAnchorEl(null);
+  };
+
+  const handleSearchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchInput.trim() || isGenerating) return;
+
+    setIsGenerating(true);
+    setSearchError(null);
+
+    try {
+      const data = await generateBoardData(searchInput, geminiSystemPrompt);
+      setBoardData(data);
+      // Optional: close sidebar or switch back to settings
+      // setIsOpen(false); 
+    } catch (err) {
+      console.error('Error generating board from sidebar:', err);
+      setSearchError(err instanceof Error ? err.message : 'Error al generar el tablero');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const toggleFullscreen = () => {
@@ -146,6 +185,26 @@ export const Sidebar: React.FC = () => {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
           
+          {/* Búsqueda / IA (PRIMERO) */}
+          <Box
+            onClick={() => handleNavClick('search')}
+            sx={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%',
+              cursor: 'pointer', color: themeMode === 'dark' ? 'rgba(255,255,255,0.7)' : 'text.secondary', p: '0.5rem',
+              bgcolor: (isOpen && sidebarMode === 'search') ? (themeMode === 'dark' ? '#1a1c1e' : 'background.default') : 'transparent',
+              borderTop: 1, borderBottom: 1,
+              borderColor: (isOpen && sidebarMode === 'search') ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider') : 'transparent',
+              borderLeft: (isOpen && sidebarMode === 'search') ? '3px solid #9c27b0' : '3px solid transparent',
+              boxShadow: (theme) => (isOpen && sidebarMode === 'search') ? `1px 0 0 ${themeMode === 'dark' ? '#1a1c1e' : theme.palette.background.default}` : 'none',
+              transition: 'all 0.2s',
+              position: 'relative', zIndex: (isOpen && sidebarMode === 'search') ? 2 : 1,
+            }}
+            title="Búsqueda e IA"
+          >
+            <AutoAwesomeIcon style={{ fontSize: '2rem', marginBottom: '4px', color: '#9c27b0' }} />
+            <span style={{ fontSize: '10px', fontWeight: 600 }}>Búsqueda</span>
+          </Box>
+
           {/* Ajustes */}
           <Box
             onClick={() => handleNavClick('settings')}
@@ -155,17 +214,16 @@ export const Sidebar: React.FC = () => {
               bgcolor: (isOpen && sidebarMode === 'settings') ? (themeMode === 'dark' ? '#1a1c1e' : 'background.default') : 'transparent',
               borderTop: 1, borderBottom: 1,
               borderColor: (isOpen && sidebarMode === 'settings') ? (themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider') : 'transparent',
-              borderLeft: (isOpen && sidebarMode === 'settings') ? '3px solid #1976d2' : '3px solid transparent',
+              borderLeft: (isOpen && sidebarMode === 'settings') ? '3px solid #03a9f4' : '3px solid transparent',
               boxShadow: (theme) => (isOpen && sidebarMode === 'settings') ? `1px 0 0 ${themeMode === 'dark' ? '#1a1c1e' : theme.palette.background.default}` : 'none',
               transition: 'all 0.2s',
               position: 'relative', zIndex: (isOpen && sidebarMode === 'settings') ? 2 : 1,
             }}
-            title="Ajustes"
+            title="Ajustes de diseño"
           >
             <TuneIcon style={{ fontSize: '2rem', marginBottom: '4px', color: '#03a9f4' }} />
             <span style={{ fontSize: '10px', fontWeight: 600 }}>Ajustes</span>
           </Box>
-
 
           {/* Mis Imágenes */}
           <Box
@@ -357,11 +415,26 @@ export const Sidebar: React.FC = () => {
                 <Tab label="Documento" sx={{ minHeight: '40px', py: 0, textTransform: 'none', fontWeight: 'bold' }} />
                 <Tab label="Global" sx={{ minHeight: '40px', py: 0, textTransform: 'none', fontWeight: 'bold' }} />
               </Tabs>
+            ) : sidebarMode === 'search' ? (
+              <Tabs
+                value={searchTabIndex}
+                onChange={(_, val) => setSearchTabIndex(val)}
+                variant="fullWidth"
+                sx={{ 
+                  minHeight: '40px', flex: 1,
+                  '& .MuiTab-root': { color: themeMode === 'dark' ? 'rgba(255,255,255,0.5)' : 'inherit' },
+                  '& .Mui-selected': { color: themeMode === 'dark' ? '#fff !important' : 'inherit' }
+                }}
+              >
+                <Tab label="Búsqueda" sx={{ minHeight: '40px', py: 0, textTransform: 'none', fontWeight: 'bold' }} />
+                <Tab label="Gemini (IA)" sx={{ minHeight: '40px', py: 0, textTransform: 'none', fontWeight: 'bold' }} />
+              </Tabs>
             ) : (
               <Typography variant="subtitle2" sx={{ px: 2, fontWeight: 'bold', color: themeMode === 'dark' ? '#fff' : 'text.secondary', textTransform: 'uppercase' }}>
                 {sidebarMode === 'library' ? 'Pictogramas' : 
                  sidebarMode === 'local' ? 'Mis Imágenes' : 
-                 sidebarMode === 'templates' ? 'Actividades' : ''}
+                 sidebarMode === 'templates' ? 'Actividades' : 
+                 sidebarMode === 'search' ? 'Búsqueda' : ''}
               </Typography>
             )}
             <IconButton 
@@ -979,7 +1052,121 @@ export const Sidebar: React.FC = () => {
           </>
         )}
 
-        {sidebarMode !== 'settings' && (
+        {sidebarMode === 'search' && (
+          <Box sx={{ 
+            overflowY: 'auto', flex: 1, p: 2, display: 'flex', flexDirection: 'column', gap: 2,
+            color: themeMode === 'dark' ? '#fff' : 'inherit'
+          }}>
+            {searchTabIndex === 0 ? (
+              /* Búsqueda Tab */
+              <Box component="form" onSubmit={handleSearchSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                  Generar nuevo tablero
+                </Typography>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  placeholder="Ej: Un día en la playa, visita al médico..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  disabled={isGenerating}
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': {
+                      color: themeMode === 'dark' ? '#fff' : 'inherit',
+                      '& fieldset': { borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.2)' : 'inherit' }
+                    }
+                  }}
+                />
+                {searchError && (
+                  <Alert severity="error" variant="outlined" sx={{ fontSize: '0.75rem' }}>
+                    {searchError}
+                  </Alert>
+                )}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isGenerating || !searchInput.trim()}
+                  startIcon={isGenerating ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeIcon />}
+                  sx={{ textTransform: 'none', fontWeight: 'bold', borderRadius: 2 }}
+                >
+                  {isGenerating ? 'Generando...' : 'Generar Tablero'}
+                </Button>
+                <Typography variant="caption" sx={{ opacity: 0.5, textAlign: 'center', mt: 1 }}>
+                  Esto reemplazará el tablero actual.
+                </Typography>
+              </Box>
+            ) : (
+              /* Gemini Tab Content */
+              <Box sx={{ 
+                overflowY: 'auto', flex: 1, display: searchTabIndex === 1 ? 'flex' : 'none', flexDirection: 'column', gap: 2, p: 2,
+                color: themeMode === 'dark' ? '#fff' : 'inherit'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                    System Prompt (Instrucciones)
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={() => {
+                        setDraftPrompt(geminiSystemPrompt);
+                        setIsFullscreenPromptOpen(true);
+                      }}
+                      variant="contained"
+                      sx={{ textTransform: 'none', borderRadius: 2 }}
+                    >
+                      Editar
+                    </Button>
+                    <Tooltip title="Restaurar por defecto">
+                      <IconButton 
+                        size="small" 
+                        onClick={() => {
+                          if (confirm('¿Restaurar el prompt original? Se perderán tus cambios.')) {
+                            setGeminiSystemPrompt(DEFAULT_GEMINI_PROMPT);
+                          }
+                        }}
+                        sx={{ color: 'error.main' }}
+                      >
+                        <RestartAltIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+
+                <Box 
+                  sx={{ 
+                    flex: 1, 
+                    border: '1px solid', 
+                    borderColor: themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'divider',
+                    borderRadius: 2,
+                    p: 1.5,
+                    bgcolor: themeMode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                    overflowY: 'auto',
+                    maxHeight: 'calc(100vh - 250px)'
+                  }}
+                  data-color-mode={themeMode}
+                >
+                  <MDEditor.Markdown 
+                    source={geminiSystemPrompt} 
+                    style={{ 
+                      backgroundColor: 'transparent',
+                      fontSize: '13px',
+                      fontFamily: 'inherit'
+                    }} 
+                  />
+                </Box>
+
+                <Alert severity="info" sx={{ mt: 1, '& .MuiAlert-message': { fontSize: '0.75rem' } }}>
+                  Usa este prompt para definir las reglas de generación de la IA. El editor avanzado te permite usar negrita, listas y más.
+                </Alert>
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {sidebarMode !== 'settings' && sidebarMode !== 'search' && (
           <Box sx={{ p: 3 }}>
             <Typography variant="body2" color="text.secondary">
               Sección en desarrollo...
@@ -1006,6 +1193,64 @@ export const Sidebar: React.FC = () => {
           </Box>
         )}
       </Box>
+
+      {/* Fullscreen Prompt Editor */}
+      <Dialog
+        fullScreen
+        open={isFullscreenPromptOpen}
+        onClose={() => setIsFullscreenPromptOpen(false)}
+      >
+        <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: themeMode === 'dark' ? '#0d1117' : '#fff' }}>
+          <Box sx={{ 
+            p: 2, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            bgcolor: themeMode === 'dark' ? '#161b22' : '#f6f8fa'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <EditIcon color="primary" />
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Editor Avanzado de System Prompt
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button 
+                variant="outlined" 
+                color="inherit"
+                onClick={() => setIsFullscreenPromptOpen(false)}
+                sx={{ textTransform: 'none' }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                variant="contained" 
+                color="primary"
+                startIcon={<SaveIcon />}
+                onClick={() => {
+                  setGeminiSystemPrompt(draftPrompt);
+                  setIsFullscreenPromptOpen(false);
+                }}
+                sx={{ textTransform: 'none' }}
+              >
+                Guardar Cambios
+              </Button>
+            </Box>
+          </Box>
+          
+          <Box sx={{ flex: 1, p: 0 }} data-color-mode={themeMode}>
+            <MDEditor
+              value={draftPrompt}
+              onChange={(val) => setDraftPrompt(val || '')}
+              height="100%"
+              preview="live"
+              autoFocus
+            />
+          </Box>
+        </Box>
+      </Dialog>
 
     </Box>
   );
