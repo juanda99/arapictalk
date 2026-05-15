@@ -67,7 +67,7 @@ export const Cell: React.FC<CellProps> = React.memo(({ keyword, columnType }) =>
   };
 
   const cellStyle: React.CSSProperties = {
-    backgroundColor: getBackgroundColor(),
+    backgroundColor: !primaryPictogramId ? '#d32f2f' : getBackgroundColor(),
     border: profile.cellBorders ? `${profile.borderWidth}px solid ${getBorderColor()}` : 'none',
     borderRadius: `${profile.borderRadius}px`,
     display: 'flex',
@@ -132,11 +132,23 @@ export const Cell: React.FC<CellProps> = React.memo(({ keyword, columnType }) =>
               style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
             />
           ) : (
-            <div className="no-image-placeholder" style={{ width: '100%', height: '100%', backgroundColor: '#f9f9f9' }} />
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '4px' }}>
+              <span style={{ 
+                fontSize: `calc(${profile.fontSize}px * 1.5)`, 
+                fontWeight: 'bold', 
+                color: '#FFFFFF',
+                fontFamily: profile.fontFamily,
+                textTransform: profile.capitalLetters ? 'uppercase' : 'none',
+                lineHeight: 1.1,
+                wordBreak: 'break-word'
+              }}>
+                {keyword}
+              </span>
+            </div>
           )}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-          <span style={textStyle}>{keyword}</span>
+          {primaryPictogramId && <span style={textStyle}>{keyword}</span>}
           {profile.secondaryTextEnabled && secondaryData && (
             <span style={secondaryTextStyle}>{secondaryData}</span>
           )}

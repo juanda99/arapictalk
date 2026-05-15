@@ -26,7 +26,7 @@ export const SentenceBar: React.FC = () => {
   }, [setElements]);
 
   const barStyle: React.CSSProperties = {
-    backgroundColor: themeMode === 'dark' ? '#25282b' : profile.backgroundColor,
+    backgroundColor: profile.sentenceBarColor || (themeMode === 'dark' ? '#7cb342' : '#9ccc65'),
     border: 'none',
     borderRadius: `0 0 ${profile.borderRadius}px ${profile.borderRadius}px`,
     margin: '0',
@@ -34,8 +34,8 @@ export const SentenceBar: React.FC = () => {
     alignItems: 'center',
     height: `${rowHeight + extraSentenceBarHeight + profile.spacing}px`,
     paddingTop: `${profile.spacing}px`,
-    paddingLeft: `${profile.spacing / 2}px`,
-    paddingRight: `${profile.spacing / 2}px`,
+    paddingLeft: 0,
+    paddingRight: 0,
     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
     overflowX: 'auto',
     position: 'relative',
@@ -44,8 +44,8 @@ export const SentenceBar: React.FC = () => {
   };
 
   const itemStyle: React.CSSProperties = {
-    backgroundColor: '#fff',
-    border: profile.cellBorders ? `1px solid ${profile.borderColor}` : '1px solid #eee',
+    backgroundColor: 'transparent',
+    border: 'none',
     borderRadius: `${profile.borderRadius}px`,
     height: '100%',
     width: `${rowHeight}px`, // Keep width based on standard rowHeight
@@ -76,7 +76,10 @@ export const SentenceBar: React.FC = () => {
             return (
               <div 
                 key={el.id} 
-                style={itemStyle}
+                style={{
+                  ...itemStyle,
+                  backgroundColor: !currentId ? '#d32f2f' : 'transparent',
+                }}
                 onClick={() => cycleVariation(el.id)}
               >
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden' }}>
@@ -89,21 +92,31 @@ export const SentenceBar: React.FC = () => {
                       style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
                     />
                   ) : (
-                    <div className="sentence-no-image" />
+                    <span style={{ 
+                      fontSize: '0.9rem', 
+                      fontWeight: 'bold', 
+                      color: '#FFFFFF',
+                      textAlign: 'center',
+                      lineHeight: 1,
+                      padding: '2px'
+                    }}>
+                      {el.text}
+                    </span>
                   )}
                 </div>
                 
                 <span className="sentence-text" style={{ 
-                  fontSize: '0.6rem', 
+                  fontSize: '0.7rem', 
                   fontWeight: 'bold', 
+                  color: themeMode === 'dark' ? '#fff' : '#1b5e20', // Dark green for contrast
                   textAlign: 'center',
                   width: '100%',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
-                  marginTop: '2px'
+                  marginTop: '4px'
                 }}>
-                  {el.text}
+                  {currentId && el.text}
                 </span>
 
                 {el.pictoIds && el.pictoIds.length > 1 && (

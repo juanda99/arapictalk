@@ -19,6 +19,8 @@ export interface UserProfile {
   isSquare: boolean;
   spacing: number;
   showColumnHeaders?: boolean;
+  sentenceBarColor?: string;
+  boardBackgroundColor?: string;
   // Global - Texto
   showText: boolean;
   fontFamily: string;
