@@ -53,6 +53,7 @@ const model = genAI.getGenerativeModel({
     responseMimeType: "application/json",
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     responseSchema: schema as any,
+    temperature: 0.1,
   },
 });
 
