@@ -7,8 +7,14 @@ import Tooltip from '@mui/material/Tooltip';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import LanguageIcon from '@mui/icons-material/Language';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import KeyIcon from '@mui/icons-material/Key';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { geminiApiKeyAtom, isApiKeyDialogOpenAtom } from '../store/atoms/apiKeys';
 
 export const Header: React.FC = () => {
+  const geminiApiKey = useAtomValue(geminiApiKeyAtom);
+  const setIsApiKeyDialogOpen = useSetAtom(isApiKeyDialogOpenAtom);
+
   return (
     <AppBar 
       position="static" 
@@ -42,6 +48,25 @@ export const Header: React.FC = () => {
         <Box sx={{ flexGrow: 1 }} />
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {!geminiApiKey && (
+            <Tooltip title="Configurar API Key">
+              <IconButton 
+                size="large" 
+                onClick={() => setIsApiKeyDialogOpen(true)}
+                sx={{ 
+                  color: 'white',
+                  animation: 'pulse 2s infinite',
+                  '@keyframes pulse': {
+                    '0%': { opacity: 1 },
+                    '50%': { opacity: 0.5 },
+                    '100%': { opacity: 1 }
+                  }
+                }}
+              >
+                <KeyIcon />
+              </IconButton>
+            </Tooltip>
+          )}
           <Tooltip title="Informar de un error">
             <IconButton size="large" sx={{ color: 'white' }}>
               <BugReportIcon />

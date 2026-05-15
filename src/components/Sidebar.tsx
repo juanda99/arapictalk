@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { isSidebarOpenAtom, themeModeAtom } from '../store/atoms/uiState';
 import { activeProfileAtom, geminiSystemPromptAtom, DEFAULT_GEMINI_PROMPT, boardDataAtom } from '../store/atoms/boardState';
 import { generateBoardData } from '../services/geminiApi';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useSetAtom, useAtomValue } from 'jotai';
+import { geminiApiKeyAtom, isApiKeyDialogOpenAtom, apiKeyErrorAtom } from '../store/atoms/apiKeys';
 import MDEditor from '@uiw/react-md-editor';
 // Import MDEditor styles
 import '@uiw/react-md-editor/markdown-editor.css';
@@ -62,6 +63,7 @@ import { isFullscreenAtom } from '../store/atoms/uiState';
 import { FONT_LIST } from '../constants/fonts';
 import { FontOption } from './FontOption';
 import languages from '../constants/languages';
+import KeyIcon from '@mui/icons-material/Key';
 
 const FITZGERALD_COLORS = [
   { name: 'Personas', color: '#FFF59D' },
@@ -84,6 +86,9 @@ export const Sidebar: React.FC = () => {
   const [isFullscreen] = useAtom(isFullscreenAtom);
   const [geminiSystemPrompt, setGeminiSystemPrompt] = useAtom(geminiSystemPromptAtom);
   const setBoardData = useSetAtom(boardDataAtom);
+  const geminiApiKey = useAtomValue(geminiApiKeyAtom);
+  const setIsApiKeyDialogOpen = useSetAtom(isApiKeyDialogOpenAtom);
+  const setApiKeyError = useSetAtom(apiKeyErrorAtom);
   const [sidebarMode, setSidebarMode] = useState<'settings' | 'library' | 'local' | 'templates' | 'search'>('search');
   const [tabIndex, setTabIndex] = useState(0);
   const [searchTabIndex, setSearchTabIndex] = useState(0);
@@ -131,13 +136,21 @@ export const Sidebar: React.FC = () => {
     setSearchError(null);
 
     try {
-      const data = await generateBoardData(searchInput, geminiSystemPrompt);
+      const data = await generateBoardData(searchInput, geminiSystemPrompt, geminiApiKey);
       setBoardData(data);
       // Optional: close sidebar or switch back to settings
       // setIsOpen(false); 
     } catch (err) {
       console.error('Error generating board from sidebar:', err);
-      setSearchError(err instanceof Error ? err.message : 'Error al generar el tablero');
+      
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('API_KEY_MISSING') || msg.includes('API_KEY_LEAKED') || msg.includes('leaked')) {
+        setApiKeyError(msg.includes('LEAKED') || msg.includes('leaked') ? 'API_KEY_LEAKED' : 'API_KEY_MISSING');
+        setIsApiKeyDialogOpen(true);
+        setSearchError(msg.includes('LEAKED') || msg.includes('leaked') ? 'Clave API filtrada o inválida' : 'Falta la clave API de Gemini');
+      } else {
+        setSearchError(err instanceof Error ? err.message : 'Error al generar el tablero');
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -1102,6 +1115,36 @@ export const Sidebar: React.FC = () => {
                 overflowY: 'auto', flex: 1, display: searchTabIndex === 1 ? 'flex' : 'none', flexDirection: 'column', gap: 2, p: 2,
                 color: themeMode === 'dark' ? '#fff' : 'inherit'
               }}>
+                {/* API Key Management */}
+                <Box sx={{ 
+                  mb: 1, p: 2, 
+                  bgcolor: themeMode === 'dark' ? 'rgba(33, 150, 243, 0.1)' : 'rgba(33, 150, 243, 0.05)', 
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: 'primary.main',
+                }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <KeyIcon fontSize="small" /> Gemini API Key
+                  </Typography>
+                  <Typography variant="caption" sx={{ display: 'block', mb: 2, opacity: 0.8 }}>
+                    {geminiApiKey ? '••••••••••••' + geminiApiKey.slice(-4) : 'No configurada'}
+                  </Typography>
+                  <Button
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    startIcon={<EditIcon />}
+                    onClick={() => {
+                      setApiKeyError(null);
+                      setIsApiKeyDialogOpen(true);
+                    }}
+                    sx={{ textTransform: 'none', borderRadius: 2 }}
+                  >
+                    Cambiar Clave
+                  </Button>
+                </Box>
+
+                <Divider sx={{ my: 1 }} />
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
                     System Prompt (Instrucciones)
